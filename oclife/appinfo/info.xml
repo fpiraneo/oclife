@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<info>
+	<id>oclife</id>
+	<name>OCLife</name>
+	<description>Add and manage hierarchical tags to your documents.</description>
+	<version>0.0.2</version>
+	<licence>MIT</licence>
+	<author>Francesco PIRANEO G.</author>
+	<require>6</require>
+	<shipped>true</shipped>
+</info>

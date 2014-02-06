@@ -1,0 +1,26 @@
+div.oclife_content {
+    position: relative;
+}
+
+div.oclife_toolbar {
+    padding: 4px;
+    display: inline-block;
+    background-color: rgb(238, 238, 238);
+    width: 100%;
+}
+
+span.oclife_header {
+    position: absolute;
+    margin: 6px 0px 0px 10px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+div.oclife_statusbar {
+    position:fixed;
+    width:100%;
+    background-color: rgb(238, 238, 238);
+    border: 1px solid gray;
+    padding:5px;
+    bottom:0px;
+}

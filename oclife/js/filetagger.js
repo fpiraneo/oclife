@@ -113,6 +113,8 @@ $(document).ready(function(){
                                     timeout: 2000,
 
                                     data: {
+                                        id: fileID,
+                                        etag: etag
                                     },
 
                                     success: function(result) {

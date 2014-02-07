@@ -443,4 +443,61 @@ class hTags {
         
         return TRUE;
     }
+    
+    /**
+     * Add a tag for a file ID
+     * @param type $fileID
+     * @param type $tagID
+     * @return boolean Description
+     */
+    public static function addTagForFile($fileID, $tagID) {
+        return TRUE;
+    }
+    
+    /**
+     * Remove a tag for a file ID
+     * @param type $fileID
+     * @param type $tagID
+     * @return boolean Description
+     */
+    public static function removeTagForFile($fileID, $tagID) {
+        return TRUE;
+    }
+    
+    /**
+     * Get all tags for a file ID
+     * @param type $fileID
+     * @return array Description
+     */
+    public static function getAllTagsForFile($fileID) {
+        $result = array();
+        
+        return $result;
+    }
+}
+
+class tag {
+    public $value;
+    public $label;
+    
+    function __construct($value, $label) {
+        $this->value = $value;
+        $this->label = $label;
+    }
+
+    public function getValue() {
+        return $this->value;
+    }
+
+    public function getLabel() {
+        return $this->label;
+    }
+
+    public function setValue($value) {
+        $this->value = $value;
+    }
+
+    public function setLabel($label) {
+        $this->label = $label;
+    }
 }

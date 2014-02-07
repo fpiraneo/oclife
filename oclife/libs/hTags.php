@@ -443,14 +443,35 @@ class hTags {
         
         return TRUE;
     }
-    
+
     /**
      * Add a tag for a file ID
-     * @param type $fileID
-     * @param type $tagID
-     * @return boolean Description
+     * @param type $fileID File ID where to add the tag
+     * @param type $tagID ID of tag to be added
+     * @return boolean TRUE if success, FALSE otherwise
      */
     public static function addTagForFile($fileID, $tagID) {
+        // Check if tag is already present
+        $result = array();
+        $sql = 'SELECT id FROM *PREFIX*oclife_docTags WHERE fileid=? AND tagid=?';
+        $args = array($fileID, $tagID);
+        $query = \OCP\DB::prepare($sql);
+        $resRsrc = $query->execute($args);
+        
+        while($row = $resRsrc->fetchRow()) {
+            $result[] = $row['id'];
+        }
+        
+        if(count($result) != 0) {
+            return FALSE;
+        }
+    
+        // Proceed to add the tag
+        $sql = 'INSERT INTO *PREFIX*oclife_docTags (fileid, tagid) VALUES (?,?)';
+        $args = array($fileID, $tagID);
+        $query = \OCP\DB::prepare($sql);
+        $resRsrc = $query->execute($args);
+        
         return TRUE;
     }
     
@@ -461,6 +482,12 @@ class hTags {
      * @return boolean Description
      */
     public static function removeTagForFile($fileID, $tagID) {
+        // Proceed to add the tag
+        $sql = 'DELETE FROM *PREFIX*oclife_docTags WHERE fileid=? AND tagid=?';
+        $args = array($fileID, $tagID);
+        $query = \OCP\DB::prepare($sql);
+        $resRsrc = $query->execute($args);
+        
         return TRUE;
     }
     
@@ -471,6 +498,14 @@ class hTags {
      */
     public static function getAllTagsForFile($fileID) {
         $result = array();
+        $sql = 'SELECT tagid FROM *PREFIX*oclife_docTags WHERE fileid=?';
+        $args = array($fileID);
+        $query = \OCP\DB::prepare($sql);
+        $resRsrc = $query->execute($args);
+        
+        while($row = $resRsrc->fetchRow()) {
+            $result[] = $row['tagid'];
+        }
         
         return $result;
     }

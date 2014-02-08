@@ -35,7 +35,7 @@
 \OCP\Util::addStyle('oclife', 'bootstrap-tokenfield');
 \OCP\Util::addStyle('oclife', 'pygments-manni');
 \OCP\Util::addStyle('oclife', 'docs');
-\OCP\Util::addStyle('oclife', 'oclife_fileinfo');
+\OCP\Util::addStyle('oclife', 'oclife_fileInfo');
 
 \OCP\Util::addScript('oclife', 'bootstrap-tokenfield');
 // \OCP\Util::addScript('oclife', 'typeahead');

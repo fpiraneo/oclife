@@ -20,7 +20,7 @@ $(document).ready(function(){
 		FileActions.register('file', 'Informations', OC.PERMISSION_UPDATE,
 			function() {
 				// Specify icon for informations button
-				return OC.imagePath('oclife','icon_info');
+				return OC.imagePath('oclife','icon_info');                                
 			},
 			function(fileName) {
 				// Action to perform when clicked
@@ -30,7 +30,6 @@ $(document).ready(function(){
                                 var etag = $(tr).data('etag');
                                 
                                 var dataPath = OC.filePath('oclife', 'ajax', 'getFileInfo.php');
-                                var getTagFlat = OC.filePath('oclife', 'ajax', 'getTagFlat.php');
 
                                 $.ajax({
                                     url: dataPath,
@@ -47,16 +46,37 @@ $(document).ready(function(){
                                     success: function( result ) {
                                         if(result !== 'KO') {
                                             infoContent = result;
-                                                                                        
+                                            
+                                            // Prepare token field
+                                            var getTagFlat = OC.filePath('oclife', 'ajax', 'getTagFlat.php');
+                                            
                                             $('#oclife_tags').tokenfield({
                                               autocomplete: {
-                                                source: getTagFlat,
+                                                source:  function(request, response) {
+                                                    $.ajax({
+                                                            url: getTagFlat,
+
+                                                            data: {
+                                                                term: request.term
+                                                            },
+
+                                                            success: function(data) {
+                                                                var returnString = data;
+                                                                var jsonResult = jQuery.parseJSON(returnString);
+                                                                response(jsonResult);
+                                                            },
+                                                            
+                                                            error: function (xhr, status) {
+                                                                window.alert("Unable to get tags! Ajax error!");
+                                                            }
+                                                        })
+                                                    },
                                                 minLength: 2,
                                                 delay: 200                                                
                                               },
                                               showAutocompleteOnFocus: false
-                                            });
-                                            
+                                            });                                                                            
+                                                                                        
                                             $('#oclife_tags').on('afterCreateToken', 
                                                 function (e) {
                                                     var updateTags = OC.filePath('oclife', 'ajax', 'tagsUpdate.php');
@@ -68,7 +88,12 @@ $(document).ready(function(){
 
                                                         data: {
                                                             op: 'add',
+                                                            fileID: fileID,
                                                             tag: e.token.value.toString()
+                                                        },
+
+                                                        error: function (xhr, status) {
+                                                            window.alert('Unable to add the tag! Ajax error.');
                                                         },
 
                                                         type: "POST"});
@@ -86,7 +111,18 @@ $(document).ready(function(){
 
                                                         data: {
                                                             op: 'remove',
+                                                            fileID: fileID,
                                                             tag: e.token.value.toString()
+                                                        },
+
+                                                        success: function(result) {
+                                                            if(result === "0") {
+                                                                window.alert('Unable to remove the tag! Data base error.');
+                                                            }
+                                                        },
+
+                                                        error: function (xhr, status) {
+                                                            window.alert('Unable to remove the tag! Ajax error.');
                                                         },
 
                                                         type: "POST"});
@@ -118,7 +154,7 @@ $(document).ready(function(){
                                     },
 
                                     success: function(result) {
-                                        $('#oclife_tags').tokenfield('setTokens', result);
+                                        $('#oclife_tags').tokenfield('setTokens', JSON.parse(result));
                                     },
                                     
                                     error: function (xhr, status) {
@@ -128,7 +164,6 @@ $(document).ready(function(){
                                     type: "POST"});
                             
                                 $('#oclife_infoData').append(infoContent);
-                                
                                 $('#oclife_infos').dialog("open");
 			}
 		);
@@ -142,6 +177,8 @@ $(document).ready(function(){
             
             close: function() {
                 $('.token').remove();
+                $('#oclife_tags').off('afterCreateToken');
+                $('#oclife_tags').off('removeToken');
             }
         });
 });

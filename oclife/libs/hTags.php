@@ -1,13 +1,12 @@
 <?php
 
+namespace OCA\OCLife;
+
 /**
  * Handle hierarchical structure of tags; in DB the structure of tag will be:
  * 
  * @author fpiraneo
  */
-
-namespace OCA\OCLife;
-
 class hTags {        
     /**
      * Returns the tag ID of an existing tag
@@ -45,7 +44,7 @@ class hTags {
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
         while($row = $resRsrc->fetchRow()) {
-            $result[] = $row;
+            $result[$row['lang']] = $row['descr'];
         }
         
         return $result;
@@ -508,31 +507,5 @@ class hTags {
         }
         
         return $result;
-    }
-}
-
-class tag {
-    public $value;
-    public $label;
-    
-    function __construct($value, $label) {
-        $this->value = $value;
-        $this->label = $label;
-    }
-
-    public function getValue() {
-        return $this->value;
-    }
-
-    public function getLabel() {
-        return $this->label;
-    }
-
-    public function setValue($value) {
-        $this->value = $value;
-    }
-
-    public function setLabel($label) {
-        $this->label = $label;
     }
 }

@@ -14,7 +14,7 @@ foreach($tagData as $tag) {
         $result[] = new OCA\OCLife\tag($tag['tagid'], $tag['descr']);
     } else {
         if(strpos($tag['descr'], $searchKey) !== FALSE) {
-            $result[] = new tag($tag['tagid'], $tag['descr']);
+            $result[] = new OCA\OCLife\tag($tag['tagid'], $tag['descr']);
         }
     }
 }

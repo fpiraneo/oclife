@@ -1,4 +1,22 @@
 $(document).ready(function(){
+// Check if we can create / edit tags
+var canEditTag = 0;
+
+$.ajax({
+    url: OC.filePath('oclife', 'ajax', 'canEditTag.php'),
+    async: false,
+    timeout: 500,
+
+    success: function(result) {
+        canEditTag = parseInt(result);
+    },
+
+    error: function (xhr, status) {
+        window.alert('Unable to Get user\'s priviledge.');
+    },
+
+    type: "GET"});
+
 
     if ($('#isPublic').val()){
             // no versions actions in public mode
@@ -11,7 +29,7 @@ $(document).ready(function(){
     $('#content').append('<div id="oclife_infos" title="Informations">\n\
     <div id="oclife_infoData"></div>\n\
 <fieldset class="oclife_tagsbox" id="oclife_tags_container"><legend>Tags</legend>\n\
-<input type="text" class="form-control" id="oclife_tags" placeholder="Enter tags here" />\n\
+<input type="text" class="form-control" id="oclife_tags" placeholder="Enter tags here" min-width: 150px; />\n\
 </fieldset>\n\
 </div>');
     
@@ -79,24 +97,74 @@ $(document).ready(function(){
                                                                                         
                                             $('#oclife_tags').on('afterCreateToken', 
                                                 function (e) {
-                                                    var updateTags = OC.filePath('oclife', 'ajax', 'tagsUpdate.php');
+                                                    var tagID = e.token.value;
+                                                    var tagLabel = e.token.label;
+                                                    var newTag = (tagID.toString() === tagLabel);
                                                     
-                                                    $.ajax({
-                                                        url: updateTags,
-                                                        async: false,
-                                                        timeout: 2000,
+                                                    if(newTag) {                                                        
+                                                        var createNew = false;
+                                                        
+                                                        if(canEditTag === 1) {
+                                                            createNew = window.confirm('The tag "' + e.token.label + '" doesn\'t exist; would you like to create a new tag?');                                                        
+                                                        }
+                                                        
+                                                        if(!createNew) {
+                                                            $(e.relatedTarget).addClass('invalid');
+                                                        } else {
 
-                                                        data: {
-                                                            op: 'add',
-                                                            fileID: fileID,
-                                                            tag: e.token.value.toString()
-                                                        },
+                                                            $.ajax({
+                                                                url: OC.filePath('oclife', 'ajax', 'createTag.php'),
+                                                                async: false,
+                                                                timeout: 2000,
 
-                                                        error: function (xhr, status) {
-                                                            window.alert('Unable to add the tag! Ajax error.');
-                                                        },
+                                                                data: {
+                                                                    parentID: -1,
+                                                                    tagName: tagLabel,
+                                                                    tagLang: "xx"
+                                                                },
 
-                                                        type: "POST"});
+                                                                type: "POST",
+
+                                                                success: function(result) {
+                                                                    var resArray = result.split("-");
+                                                                    if(resArray[0] === 'OK') {
+                                                                        tagID = parseInt(resArray[1]);
+
+                                                                        newTag = false;
+                                                                    } else {
+                                                                        window.alert('Unable to create the tag! Ajax error.');
+                                                                    }
+                                                                },
+
+                                                                error: function(xhr, status) {
+                                                                    window.alert('Unable to create the tag! Ajax error.');
+                                                                    $(e.relatedTarget).addClass('invalid');
+                                                                }
+                                                            });                        
+
+                                                        }
+                                                    }
+                                                    
+                                                    if(!newTag) {
+                                                        $.ajax({
+                                                            url: OC.filePath('oclife', 'ajax', 'tagsUpdate.php'),
+                                                            async: false,
+                                                            timeout: 1000,
+
+                                                            data: {
+                                                                op: 'add',
+                                                                fileID: fileID,
+                                                                tagID: tagID,
+                                                                tagName: tagLabel
+                                                            },
+
+                                                            error: function (xhr, status) {
+                                                                window.alert('Unable to add the tag! Ajax error.');
+                                                                $(e.relatedTarget).addClass('invalid');
+                                                            },
+
+                                                            type: "POST"});
+                                                    }                                                    
                                                 }
                                             );
                                     

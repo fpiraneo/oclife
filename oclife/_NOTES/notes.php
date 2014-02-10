@@ -48,6 +48,8 @@ OCP\JSON::setContentTypeHeader();
 echo json_encode($data);
 
 On javascript: t('oclife', 'Informations') to localize textes
+ * 
+ * 
 */
 
 

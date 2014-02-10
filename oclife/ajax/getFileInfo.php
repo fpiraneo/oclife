@@ -1,7 +1,7 @@
 <?php
 // Check if app enabled and user logged in
 OCP\JSON::checkAppEnabled('oclife');
-OCP\JSON::checkLoggedIn();
+OCP\User::checkLoggedIn();
 
 // Revert parameters from ajax
 $fileID = intval(filter_input(INPUT_POST, 'fileID', FILTER_SANITIZE_NUMBER_INT));

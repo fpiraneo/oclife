@@ -4,7 +4,7 @@ OCP\JSON::checkAppEnabled('oclife');
 if($onlyAdminCanEdit) {
     OCP\User::checkAdminUser();
 } else {
-    OCP\JSON::checkLoggedIn();
+    OCP\User::checkLoggedIn();
 }
 
 $parentID = intval(filter_input(INPUT_POST, 'parentID', FILTER_SANITIZE_NUMBER_INT));

@@ -22,28 +22,14 @@
 ));
 
 // Add what's needed by TagManager
-/*
-\OCP\Util::addStyle('oclife', 'tagmanager');
-\OCP\Util::addStyle('oclife', 'typeahead');
-\OCP\Util::addScript('oclife', 'typeahead');
-\OCP\Util::addScript('oclife', 'tagmanager');
-*/
-
-
-//\OCP\Util::addStyle('oclife', 'bootstrap.min');
-// \OCP\Util::addStyle('oclife', 'tokenfield-typeahead');
 \OCP\Util::addStyle('oclife', 'bootstrap-tokenfield');
 \OCP\Util::addStyle('oclife', 'pygments-manni');
 \OCP\Util::addStyle('oclife', 'docs');
 \OCP\Util::addStyle('oclife', 'oclife_fileInfo');
 
 \OCP\Util::addScript('oclife', 'bootstrap-tokenfield');
-// \OCP\Util::addScript('oclife', 'typeahead');
 \OCP\Util::addScript('oclife', 'scrollspy');
 \OCP\Util::addScript('oclife', 'docs.min');
 
-
-
-
 OCP\App::registerAdmin('oclife', 'settings');
-OCP\Util::addscript('oclife', 'filetagger');
+OCP\Util::addscript('oclife', 'oclife_fileExtendedInfo');

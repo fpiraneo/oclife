@@ -65,7 +65,7 @@ class hTags {
 
         // Check if tag already exists
         if(count($this->searchTag($tagLang, $tagDescr)) != 0) {
-            return -1;
+            return FALSE;
         }
         
         // Proceed with creation
@@ -219,6 +219,7 @@ class hTags {
                 'key' => '-1',
                 'title' => 'Root',
                 'expanded' => true,
+                'class' => 'global',
                 'children' => array()
                 )
             );
@@ -251,6 +252,7 @@ class hTags {
         while($row = $resRsrc->fetchRow()) {
             $result['key'] = $row['tagid'];
             $result['title'] = $row['descr'];
+            $result['class'] = 'global';
         }
         
         $result['children'] = array();

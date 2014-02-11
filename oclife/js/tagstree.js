@@ -20,6 +20,13 @@ $(function(){
     $("#tagstree").fancytree({
             extensions: ["dnd", "contextMenu"],
 
+
+            renderNode: function(event, data) {
+                // Optionally tweak data.node.span
+                var nodeClass = data.node.data.class;
+                var test = nodeClass;
+             },
+
             source: {
                 url: dataPath
             },
@@ -65,10 +72,14 @@ $(function(){
                   },
                   
                 contextMenu: {
-                    menu: {
-                        'edit' : { 'name': 'Rename', 'icon': 'edit' },
-                        'new': { 'name': 'New', 'icon': 'add' },
-                        'delete': { 'name': 'Delete', 'icon': 'delete'}
+                    menu: function () {
+                        if(canEdit.value === '1') {
+                            return {'edit' : { 'name': 'Rename', 'icon': 'edit' },
+                            'new': { 'name': 'New', 'icon': 'add' },
+                            'delete': { 'name': 'Delete', 'icon': 'delete'}};
+                        } else {
+                            return {'nothing' : {'name': 'Nothing possible', 'icon':'delete'}};
+                        }
                     },
                     
                     actions: function(node, action, options) {
@@ -89,6 +100,8 @@ $(function(){
 
                                     newTagName.value = "";
                                     parentID.value = node.key;
+                                    
+                                    window.alert("NodeKey: " + node.key.toString() + " - NodeTitle: " + node.title.toString());
 
                                     $( "#createTag" ).dialog( "open" );
                                     break;
@@ -240,7 +253,8 @@ $(function(){
                                 if(resArray[0] === 'OK') {
                                     var node = $("#tagstree").fancytree("getActiveNode");
 
-                                    node.addChildren({title: newValue});
+                                    var nodeData = {'title': newValue, 'key': parseInt(resArray[1])};
+                                    node.addChildren(nodeData);
                                     node.setExpanded(true);
                                     
                                     updateStatusBar("Tag created successfully!");
@@ -289,7 +303,7 @@ $(function(){
                     var dataPath = OC.filePath('oclife', 'ajax', 'deleteTag.php');
                     var tagID = deleteID.value;
                     
-                    if(tagID == "-1") {
+                    if(tagID === "-1") {
                         updateStatusBar("Invalid tag number! Nothing done!");
                         return;
                     }

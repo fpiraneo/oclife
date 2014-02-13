@@ -510,4 +510,13 @@ class hTags {
         
         return $result;
     }
+    
+    public static function removeAllTagsForFile($fileID) {
+        $sql = 'DELETE FROM *PREFIX*oclife_docTags WHERE fileid=?';
+        $args = array($fileID);
+        $query = \OCP\DB::prepare($sql);
+        $resRsrc = $query->execute($args);
+        
+        return TRUE;        
+    }
 }

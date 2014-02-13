@@ -33,3 +33,6 @@
 
 OCP\App::registerAdmin('oclife', 'settings');
 OCP\Util::addscript('oclife', 'oclife_fileExtendedInfo');
+
+// Register filesystem hooks to remove thumbnails and tags DB entries
+OCP\Util::connectHook('OC_Filesystem', 'delete', 'OCA\OCLife\utilities', 'cleanupForDelete');

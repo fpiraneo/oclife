@@ -1,5 +1,6 @@
 div.oclife_content {
     position: relative;
+    height: 100%;
 }
 
 div.oclife_toolbar {
@@ -16,12 +17,31 @@ span.oclife_header {
     font-weight: bold;
 }
 
-div.oclife_statusbar {
-    position:fixed;
-    width:100%;
-    background-color: rgb(238, 238, 238);
-    border: 1px solid gray;
-    padding:5px;
-    bottom:0px;
+div.oclife_tagtree {
+    width: 600px;
+    height: 100%;
+    float: left;
 }
 
+div.oclife_filetable {
+    height: 100%;
+    border: 1px solid darkgray;    
+}
+
+p.oclife_title {
+    width: 100%;
+    height: 25px;
+    background-color: lightgray;
+    padding: 2px 0px 2px 20px;
+    font-weight: bold;
+}
+
+#oclife_emptylist {
+    width: 100%;
+    top: 50%;
+    text-align: center;
+    color: rgb(136, 136, 136);
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 50px;
+}

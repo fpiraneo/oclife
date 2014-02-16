@@ -1,11 +1,33 @@
+var canEditTag = 0;
+
+$(document).ready(
+        function() {
+            // Check if we can create / edit tags
+            $.ajax({
+                url: OC.filePath('oclife', 'ajax', 'canEditTag.php'),
+                async: false,
+                timeout: 500,
+
+                success: function(result) {
+                    canEditTag = parseInt(result);
+                },
+
+                error: function (xhr, status) {
+                    updateStatusBar('Unable to Get user\'s priviledge.');
+                },
+
+                type: "GET"});            
+        });
+
 $(function(){
+    
     var dataPath = OC.filePath('oclife', 'ajax', 'getTags.php');
 
     $( "#expandAll" )
         .button()
         .click(function() {
             $("#tagstree").fancytree("getRootNode").visit(function(node){
-                node.setExpanded(true);
+                node.setExpanded(true);                
             });
         });
 
@@ -20,7 +42,6 @@ $(function(){
     $("#tagstree").fancytree({
             extensions: ["dnd", "contextMenu"],
 
-
             renderNode: function(event, data) {
                 // Optionally tweak data.node.span
                 var nodeClass = data.node.data.class;
@@ -31,12 +52,54 @@ $(function(){
                 url: dataPath
             },
             
+            checkbox: true,
+
+            select: function(event, data) {
+                var selectedNodes = data.tree.getSelectedNodes();
+                var selNodesData = new Array();
+                
+                for(i = 0; i < selectedNodes.length; i++) {
+                    var nodeData = new Object();
+                    nodeData.key = selectedNodes[i].key;
+                    nodeData.title = selectedNodes[i].title;
+                    
+                    selNodesData.push(nodeData);
+                }
+                
+                var tags = JSON.stringify(selNodesData);
+
+                $.ajax({
+                    url: OC.filePath('oclife', 'ajax', 'searchFilesFromTags.php'),
+
+                    data: {
+                        tags: tags
+                    },
+
+                    type: "POST",
+
+                    success: function( result ) {
+                        $("#oclife_fileList").html(result);
+
+                        if(result === '') {
+                            $("#oclife_emptylist").css("display", "block");
+                        } else {
+                            $("#oclife_emptylist").css("display", "none");
+                        }
+                    },
+                    
+                    error: function( xhr, status ) {
+                        updateStatusBar("Unable to get files list!");
+                    }
+                });                      
+                
+            },
+
             dnd: {
                     preventVoidMoves: true, // Prevent dropping nodes 'before self', etc.
                     preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
                     autoExpandMS: 400,
                     dragStart: function(node, data) {
-                      return canEdit.value === '1';
+                      return canEditTag === 1;
                     },
                     dragEnter: function(node, data) {
                        return true;
@@ -44,10 +107,8 @@ $(function(){
                     dragDrop: function(node, data) {
                         data.otherNode.moveTo(node, data.hitMode);
 
-                        var dataPath = OC.filePath('oclife', 'ajax', 'changeHierachy.php');
-
                         $.ajax({
-                            url: dataPath,
+                            url: OC.filePath('oclife', 'ajax', 'changeHierachy.php'),
                             
                             data: {
                                 movedTag: data.otherNode.key,
@@ -71,54 +132,48 @@ $(function(){
                     }
                   },
                   
-                contextMenu: {
+            contextMenu: {
                     menu: function () {
-                        if(canEdit.value === '1') {
+                        if(canEditTag === 1) {
                             return {'edit' : { 'name': 'Rename', 'icon': 'edit' },
                             'new': { 'name': 'New', 'icon': 'add' },
                             'delete': { 'name': 'Delete', 'icon': 'delete'}};
                         } else {
-                            return {'nothing' : {'name': 'Nothing possible', 'icon':'delete'}};
+                            return {'nothing' : {'name': 'Nothing possible', 'icon':'delete', disabled: true}};
                         }
                     },
                     
                     actions: function(node, action, options) {
-                        if(canEdit.value === '1') {
-                            switch(action) {
-                                case 'edit': {
-                                    var node = $("#tagstree").fancytree("getActiveNode");
+                        switch(action) {
+                            case 'edit': {
+                                var node = $("#tagstree").fancytree("getActiveNode");
 
-                                    tagName.value = node.title;
-                                    tagID.value = node.key;
+                                tagName.value = node.title;
+                                tagID.value = node.key;
 
-                                    $( "#renameTag" ).dialog( "open" );
-                                    break;
-                                }
-
-                                case 'new': {
-                                    var node = $("#tagstree").fancytree("getActiveNode");
-
-                                    newTagName.value = "";
-                                    parentID.value = node.key;
-                                    
-                                    window.alert("NodeKey: " + node.key.toString() + " - NodeTitle: " + node.title.toString());
-
-                                    $( "#createTag" ).dialog( "open" );
-                                    break;
-                                }
-
-                                case 'delete': {
-                                    var node = $("#tagstree").fancytree("getActiveNode");
-
-                                    $("#tagToDelete").text(node.title);
-                                    deleteID.value = node.key;
-
-                                    $( "#deleteConfirm" ).dialog( "open" );
-                                    break;
-                                }
+                                $( "#renameTag" ).dialog( "open" );
+                                break;
                             }
-                        } else {
-                            $("#onlyAdmin").dialog("open");
+
+                            case 'new': {
+                                var node = $("#tagstree").fancytree("getActiveNode");
+
+                                newTagName.value = "";
+                                parentID.value = node.key;
+
+                                $( "#createTag" ).dialog( "open" );
+                                break;
+                            }
+
+                            case 'delete': {
+                                var node = $("#tagstree").fancytree("getActiveNode");
+
+                                $("#tagToDelete").text(node.title);
+                                deleteID.value = node.key;
+
+                                $( "#deleteConfirm" ).dialog( "open" );
+                                break;
+                            }
                         }
                     }
                   }
@@ -128,7 +183,6 @@ $(function(){
 
         function checkLength( o, min, max ) {
             if ( o.value.length > max || o.value.length < min ) {
-                    //o.addClass( "ui-state-error" );
                     updateTips( "Lenght must be between " + min + " - " + max + "." );
                     return false;
                 } else {
@@ -146,12 +200,12 @@ $(function(){
         }
 
         function updateStatusBar( t ) {
-            $( "#oclife_status" )
-                .text( t )
-                .addClass( "ui-state-highlight" );
-                setTimeout(function() {
-                    $("#oclife_status").text("Ready!");
-                }, 1500 );
+            $('#notification').html(t);
+            $('#notification').slideDown();
+            window.setTimeout(
+                    function(){
+                        $('#notification').slideUp();
+                    }, 5000);            
         }
 
         $( "#renameTag" ).dialog({
@@ -170,10 +224,8 @@ $(function(){
                         var newValue = tagName.value;
                         var tagToMod = tagID.value;
                         
-                        var dataPath = OC.filePath('oclife', 'ajax', 'renameTag.php');
-
                         $.ajax({
-                            url: dataPath,
+                            url: OC.filePath('oclife', 'ajax', 'renameTag.php'),
                             async: false,
                             timeout: 2000,
                             
@@ -333,16 +385,5 @@ $(function(){
                     });                    
                 }                
             }
-        });                                
-    
-        $( "#onlyAdmin" ).dialog({
-            modal: true,
-            autoOpen: false,
-            width: 320,
-            buttons: {
-                Ok: function() {
-                    $( this ).dialog( "close" );
-                }
-            }
-        });
+        });    
 });

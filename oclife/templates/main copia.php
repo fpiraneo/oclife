@@ -11,7 +11,7 @@
 </div>
 
 
-<div class="oclife_content" id="oclife_content">
+<div class="oclife_content">
     <div class="oclife_tagtree" id="tagstree">
     </div>
     
@@ -30,7 +30,7 @@
             </fieldset>
         </form>
     </div>
-
+    
     <div id="createTag" title="Create a new tag">
         <form>
             <fieldset>
@@ -40,7 +40,7 @@
             </fieldset>
         </form>
     </div>
-
+    
     <div id="deleteConfirm" title="Delete tag">
         <p>
             Really delete the tag:<br />
@@ -49,4 +49,12 @@
         </p>
         <input type="hidden" name="deleteID" id="deleteID" value="-1" />
     </div>
+    
+    <div id="onlyAdmin" title="Permission denied!">
+        <p>
+            <strong>SORRY!</strong> Only an administrator can edit tags! Ask your administrator to do what you think!
+        </p>
+    </div>    
+    
+    <input type="hidden" name="canEdit" id="canEdit" value="<?php p($_['canEdit']); ?>" />
 </div>

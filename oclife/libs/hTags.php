@@ -237,7 +237,7 @@ class hTags {
      * @param string $lang Language of the human readable field
      * @return array The tag tree result
      */
-    public function getTagTreeFromID($ID, $lang) {
+    public function getTagTreeFromID($ID, $lang = 'xx') {
         // If no ID provided - forfait
         if($ID == NULL || !is_int($ID)) {
             return -1;
@@ -374,23 +374,27 @@ class hTags {
     /**
      * Get all IDs of the child of given tag
      * @param array $parentID
-     * @return array All tags ID in hierarchical format
+     * @return array All tags ID in (hierarchical?) format
      */
     public function getAllChildID($parentID) {
         // Get all IDs in hierarchical format
         $hResult = $this->getAllChildIDHierarchical($parentID);
         
-        // Flatten the results
-        $objTmp = (object) array('aFlat' => array());
+        if(is_array($hResult)) {
+            // Flatten the results
+            $objTmp = (object) array('aFlat' => array());
 
-        array_walk_recursive($hResult, create_function('&$v, $k, &$t', '$t->aFlat[] = $v;'), $objTmp);
+            array_walk_recursive($hResult, create_function('&$v, $k, &$t', '$t->aFlat[] = $v;'), $objTmp);
 
-        // Add also the original ID to the result
-        $result = array($parentID);
-        $childs = $objTmp->aFlat;
-        
-        foreach($childs as $child) {
-            $result[] = $child;
+            // Add also the original ID to the result
+            $result = array($parentID);
+            $childs = $objTmp->aFlat;
+
+            foreach($childs as $child) {
+                $result[] = $child;
+            }
+        } else {
+            $result = -1;
         }
         
         return $result;
@@ -511,6 +515,11 @@ class hTags {
         return $result;
     }
     
+    /**
+     * Used to remove all tags for a file
+     * @param type $fileID
+     * @return boolean
+     */
     public static function removeAllTagsForFile($fileID) {
         $sql = 'DELETE FROM *PREFIX*oclife_docTags WHERE fileid=?';
         $args = array($fileID);
@@ -518,5 +527,45 @@ class hTags {
         $resRsrc = $query->execute($args);
         
         return TRUE;        
+    }
+    
+    /**
+     * Get the files with the indicated tag
+     * @param integer $tagID Tag to look at
+     * @return array ID of the files marked with the tag
+     */
+    public static function getFileWithTag($tagID) {
+        $result = array();
+        $sql = 'SELECT fileid FROM *PREFIX*oclife_docTags WHERE tagid=?';
+        $args = array($tagID);
+        $query = \OCP\DB::prepare($sql);
+        $resRsrc = $query->execute($args);
+        
+        while($row = $resRsrc->fetchRow()) {
+            $result[] = intval($row['fileid']);
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Array containing all the tags to be looked for
+     * @param array $tagArray Tag to look at - Tags will be OR'ed
+     */
+    public static function getFileWithTagArray($tagArray) {
+        // If is not an array, gives up
+        if(!is_array($tagArray)) {
+            return -1;
+        }
+        
+        $filesID = array();
+        foreach($tagArray as $tag) {
+            $partFilesID = hTags::getFileWithTag($tag);
+            $filesID = array_merge($filesID, $partFilesID);
+        }
+        
+        $uniquesID = array_unique($filesID);
+        
+        return $uniquesID;
     }
 }

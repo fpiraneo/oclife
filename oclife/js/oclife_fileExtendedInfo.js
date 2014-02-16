@@ -100,7 +100,7 @@ $(document).ready(function(){
                                                 if(resArray[0] === 'OK') {
                                                     tagID = parseInt(resArray[1]);
 
-                                                    newTag = false;
+                                                    newTag = false;                                                    
                                                 } else {
                                                     window.alert('Unable to create the tag! Ajax error.');
                                                 }

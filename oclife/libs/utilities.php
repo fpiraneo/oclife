@@ -43,8 +43,7 @@ class utilities {
      * Remove thumbnails and db entries for deleted files
      * @param type $params
      */
-    
-    static public function cleanupForDelete($params) {
+    public static function cleanupForDelete($params) {
         // Get full thumbnail path
         $path = $params['path'];
         $user = \OCP\USER::getUser();
@@ -65,4 +64,91 @@ class utilities {
         return $result;
     }
     
+    /**
+     * Get all files ID of the indicated user
+     * @param string $user Username
+     * @return array ID of all the files
+     */
+    public static function getFileList($user) {
+        $result = array();
+        
+        $userStorage = 'home::' . $user;
+        $sql = 'SELECT numeric_id FROM *PREFIX*storages WHERE id=?';
+        $args = array($userStorage);
+        $query = \OCP\DB::prepare($sql);
+        $resRsrc = $query->execute($args);
+        
+        while($row = $resRsrc->fetchRow()) {
+            $storages[] = intval($row['numeric_id']);
+        }        
+        
+        // At least one storage needed
+        if(count($storages) === 0) {
+            return -1;
+        }
+        
+        // For each storage, get the files data (fileid, path)
+        foreach($storages as $storageID) {
+            $sql = 'SELECT fileid, path, name FROM *PREFIX*filecache WHERE storage=?';
+            $args = array($storageID);
+            $query = \OCP\DB::prepare($sql);
+            $resRsrc = $query->execute($args);
+
+            while($row = $resRsrc->fetchRow()) {
+                $fileid = intval($row['fileid']);
+                $filepath = $row['path'];
+                $filename = $row['name'];
+                
+                $result[$fileid] = array('id' => $fileid, 'path' => $filepath, 'name' => $filename);
+            }
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Return the files info (id, name and path) for a given file(s) id
+     * @param string $user Username
+     * @param array $filesID IDs of the file to look at
+     * @return array Associative array with required infos
+     */
+    public static function getFileInfoFromID($user, $filesID) {
+        if(!is_array($filesID)) {
+            return -1;
+        }
+        
+        $emptyFile = array('id'=>'', 'path'=>'', 'name'=>'');
+        $usersFile = utilities::getFileList($user);
+        
+        if($usersFile === -1) {
+            return -2;
+        }
+        
+        // Loop through the provided file ID and return all result
+        $result = array();
+        
+        foreach($filesID as $fileID) {
+            if(isset($usersFile[$fileID])) {
+                $result[$fileID] = $usersFile[$fileID];
+            } else {
+                $result[$fileID] = $emptyFile;
+            }
+        }
+        
+        return $result;
+    }
+    
+    /**
+     * Prepare an image tile
+     * @param array $fileData File data
+     * @return string
+     */
+    public static function prepareTile($fileData) {
+        // $fileData = array('id'=>'', 'path'=>'', 'name'=>'')
+        $result = '<div>';
+        $result .= '<div>' . $fileData['name'] . '</div>';
+        $result .= '</div>';
+        
+        return $result;
+    }
 }

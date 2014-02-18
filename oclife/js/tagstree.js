@@ -61,7 +61,14 @@ $(function(){
             renderNode: function(event, data) {
                 // Optionally tweak data.node.span
                 var nodeClass = data.node.data.class;
-                var test = nodeClass;
+                
+                if(nodeClass == 'global') {
+                    var globalIconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_globe.png') + ")";
+                    var span = $(data.node.span);
+                    var findResult = span.find("> span.fancytree-icon");
+                    findResult.css("backgroundImage", globalIconCSS);
+                    findResult.css("backgroundPosition", "0 0");
+                }
              },
 
             source: {

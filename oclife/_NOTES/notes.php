@@ -4,7 +4,6 @@
  * - Nella finestra informazioni con movimento cursore su tag compare il numero e non la descrizione...
  * - Verificare calcolo della larghezza dell'editfield nell'inserimento delle tags
  * - Se non viene creata la thumbnail nelle extended infos mettere una icona sostitutiva!
- * - Mettere l'icona del globo per le tags globali (ora tutte...)
  * 
  * DEVI INSTALLARE IMAGEMAGICK!!!
  */

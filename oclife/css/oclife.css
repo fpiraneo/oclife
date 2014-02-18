@@ -45,3 +45,40 @@ p.oclife_title {
     font-weight: bold;
     padding: 50px;
 }
+
+div.oclife_tile {
+    display: block;
+    width: 200px;
+    height: 200px;
+    border: 1px solid darkgray;
+    float: left;
+    margin: 1px;
+    overflow: hidden;
+}
+
+div.oclife_tile:hover {
+    border-color: black;
+    background-color: lightgray;
+}
+
+.oclife_tile div {
+    width: 100%;
+    text-align: center;
+    background-color: darkgray;
+    font-family: sans-serif;
+    font-size: 9pt;
+    top: 90%;
+    position: relative;
+    z-index: 100;
+    float: left;
+}
+
+.oclife_tile img {
+    position: relative;
+    top: -20px;
+    left: 0px;
+    z-index: 0;
+    width:200px; 
+    height: auto;
+}
+

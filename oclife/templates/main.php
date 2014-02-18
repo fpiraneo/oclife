@@ -41,12 +41,19 @@
         </form>
     </div>
 
-    <div id="deleteConfirm" title="Delete tag">
-        <p>
+    <div id="deleteConfirm" title="Delete tag"> 
+        <div>
             Really delete the tag:<br />
             <div style="width: 100%; text-align: center; padding: 5px 0px 15px 0px; font-weight: bold;" id="tagToDelete">TagToDelete</div>
             <strong>NOTE:</strong> Also child tags will be removed!
-        </p>
+        </div>
         <input type="hidden" name="deleteID" id="deleteID" value="-1" />
+    </div>
+
+    <div id="filePath" title="Where is this file?"> 
+        <div>
+            You can find this file here:<br />
+            <div style="width: 100%; text-align: center; padding: 5px 0px 15px 0px; font-weight: bold;" id="pathInfo">filePath</div>
+        </div>
     </div>
 </div>

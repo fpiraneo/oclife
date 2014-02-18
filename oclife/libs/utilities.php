@@ -145,8 +145,13 @@ class utilities {
      */
     public static function prepareTile($fileData) {
         // $fileData = array('id'=>'', 'path'=>'', 'name'=>'')
-        $result = '<div>';
+        $pathInfo = substr(pathinfo($fileData['path'], PATHINFO_DIRNAME), 6); 
+        
+        $result = '<div class="oclife_tile" data-fileid="' . $fileData['id'] . '" data-filePath="' . $pathInfo . '">';
         $result .= '<div>' . $fileData['name'] . '</div>';
+                
+        $thumbPath = \OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('fileid' => $fileData['id']));
+        $result .= '<img src="' . $thumbPath . '" />';
         $result .= '</div>';
         
         return $result;

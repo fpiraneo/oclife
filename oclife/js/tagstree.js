@@ -19,6 +19,22 @@ $(document).ready(
                 type: "GET"});            
         });
 
+
+$(document).ready(
+        function() {
+            
+        $("#fileTable").delegate(
+                ".oclife_tile",
+                "click",
+                function(eventData) {
+                    var fileID = $(this).attr("data-fileid");
+                    var filePath = $(this).attr("data-filepath");
+                    
+                    $("#pathInfo").text(filePath);
+                    $( "#filePath" ).dialog( "open" );
+                });            
+        });
+
 $(function(){
     
     var dataPath = OC.filePath('oclife', 'ajax', 'getTags.php');
@@ -385,5 +401,18 @@ $(function(){
                     });                    
                 }                
             }
-        });    
+        });
+
+    $("#filePath").dialog({
+        resizable: false,
+        autoOpen: false,
+        width: 320,
+        height: 200,
+        modal: true,
+        buttons: {
+            "Close": function() {
+                $( this ).dialog( "close" );
+            }           
+        }
+    });            
 });

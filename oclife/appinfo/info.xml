@@ -4,8 +4,8 @@
 	<name>OCLife</name>
 	<description>Add and manage hierarchical tags to your documents.</description>
 	<version>0.0.2</version>
-	<licence>MIT</licence>
-	<author>Francesco PIRANEO G.</author>
+	<licence>GNU GPL Version 3</licence>
+	<author>Francesco PIRANEO G. (fpiraneo@gmail.com)</author>
 	<require>6</require>
 	<shipped>true</shipped>
 </info>

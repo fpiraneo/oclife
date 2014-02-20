@@ -1,0 +1,12 @@
+NOTES:
+On javascript: t('oclife', 'Informations') to localize textes
+
+Cool sites to look at:
+http://layout.jquery-dev.net/
+http://www.instantshift.com/2013/08/19/jquery-layout-and-ui-plugins/
+http://tutorialzine.com/2013/04/50-amazing-jquery-plugins/
+
+
+TODO:
+ - Verificare calcolo della larghezza dell'editfield nell'inserimento delle tags
+ - Inserire le note di licenza in testata ai files

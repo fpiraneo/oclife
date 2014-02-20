@@ -59,11 +59,14 @@ $(document).ready(function(){
                                         }
                                     })
                                 },
-                            minLength: 2,
-                            delay: 200                                                
+                                minLength: 2,
+                                delay: 200                                                
                           },
                           showAutocompleteOnFocus: false
-                        });                                                                            
+                        }).data('bs.tokenfield').$input.on('autocompletefocus', function(e, ui){
+                            e.preventDefault();
+                            $(this).val(ui.item.label);
+                        }) ;                                                                            
 
                         $('#oclife_tags').on('afterCreateToken', 
                             function (e) {

@@ -32,23 +32,17 @@ $user = OCP\User::getUser();
 // Get file path
 $filePath = \OC\Files\Filesystem::getPath($fileID);
 
-// prepend path to share
-$ownerView = new \OC\Files\View('/' . $user . '/');
-
-$myDir = \OC_User::getHome($user);
-
-// Build source path
-$imgPath = $myDir . '/files' . $filePath;
-
-// Build thumb path
-$previewPath = \OC_User::getHome($user) . '/oclife/previews/' . $user . $filePath;
+// Build user's view path
+$viewPath = '/' . $user . '/files';
 
 // Build the placeholder's path - Image to show in case we don't have the thumbnail
 $placeHolderPath = __DIR__ . '/img/noImage.png';
 
-// Get information about the path
+// Build thumb path
+$previewPath = \OC_User::getHome($user) . '/oclife/previews/' . $user . $filePath;
 $previewPathInfo = pathinfo($previewPath);
 $previewDir = $previewPathInfo['dirname'];
+$thumbPath = $previewPathInfo['dirname'] . '/' . $previewPathInfo['filename'] . '.png';
 
 // Check and eventually prepare preview directory
 if (!is_dir($previewDir)) {
@@ -56,32 +50,21 @@ if (!is_dir($previewDir)) {
 }
 
 // Check if thumbnail exist, create it otherwise
-$imgHandler = new \oclife\imagehandler\ImageHandler();
-
-if(!file_exists($previewPath)) {
-    // Create thumbnail
+if(!file_exists($thumbPath)) {
+    $imgHandler = new \oclife\imagehandler\ImageHandler();
     $imgHandler->setHeight(320);
     $imgHandler->setWidth(320);
     $imgHandler->setBgColorFromValues(255, 255, 255);
     
-    $view = new \OC\Files\View('/' . $user . '/files');
-    $handle = $view->fopen($filePath, 'r');
-    $image = new \OCP\Image($handle);
-    fclose($handle);
-    
-    if ($image->valid()) {
-        $image->fixOrientation();
-        $image->resize(320);
-        $image->save($previewPath);
-    }
+    $imgHandler->generateImageThumbnail($viewPath, $filePath, $thumbPath);
 }
 
 // Output the preview
-$previewPath = (is_file($previewPath)) ? $previewPath : $placeHolderPath;
-$fp = @fopen($previewPath, 'rb');
-$mtime = filemtime($previewPath);
-$size = filesize($previewPath);
-$mime = \OC_Helper::getMimetype($previewPath);
+$previewPath = (is_file($thumbPath)) ? $previewPath : $placeHolderPath;
+$fp = @fopen($thumbPath, 'rb');
+$mtime = filemtime($thumbPath);
+$size = filesize($thumbPath);
+$mime = \OC_Helper::getMimetype($thumbPath);
 
 \OCP\Response::enableCaching();
 \OCP\Response::setLastModifiedHeader($mtime);

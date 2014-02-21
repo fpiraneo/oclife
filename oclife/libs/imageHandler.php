@@ -34,6 +34,8 @@ class ImageHandler {
     private $height;
     private $destPath;
     private $bgColor;
+    private $htmlBgColor;
+    private $imagick;
     
     /**
      * Initialize Image data handler
@@ -41,7 +43,17 @@ class ImageHandler {
      * @param type $connection Reference of db connection
      */
     function __construct() {
-        $this->handableImageType = array('gif', 'jpeg', 'jpg', 'png');
+        // Check if ImageMagick is enabled; use standard GD otherwise
+        $this->imagick = extension_loaded('imagick');
+        if($this->imagick) {
+            $this->handableImageType = array('gif', 'jpeg', 'jpg', 'png', 'bmp', 'xbm', 'nef', 'cr2', 'tif', 'pcd');
+        } else {
+            $this->handableImageType = array('gif', 'jpeg', 'jpg', 'png', 'bmp', 'xbm');
+        }
+        
+        // Set default background color as black
+        $this->htmlBgColor = '#000000';
+        $this->setColorFromHTML($this->htmlBgColor);
     }
 
     public function getWidth() {
@@ -188,7 +200,7 @@ class ImageHandler {
         $blue = hexdec(substr($color, 5, 2));
         
         $this->setBgColorFromValues($red, $green, $blue);
-        
+        $this->htmlBgColor = $color;
         return true;
     }
     
@@ -231,126 +243,118 @@ class ImageHandler {
     }
     
     /**
-     * Generate thumbnail of an Image with GD
-     * Based on a function taken at:
-     * http://salman-w.blogspot.com/2008/10/resize-Images-using-phpgd-library.html
+     * Generate thumbnail of an image
      * @param string $srcImagePath Source image path
      * @param string $dstImagePath Destination image path
      * @return boolean TRUE image generated successfully, FALSE otherwise
      */
-   public function generateImageThumbnail($srcImagePath, $dstImagePath)
-   {
-       // Check for a valid color set
-       if(!$this->checkValidColor()) {           
+    public function generateImageThumbnail($viewPath, $srcImagePath, $dstImagePath) {
+        // Check for a valid color set
+        if(!$this->checkValidColor()) {           
+             return FALSE;
+        }
+
+        // Check for a valid width and height
+        if(!isset($this->width) || !isset($this->height)) {
             return FALSE;
-       }
-       
-       // Check for a valid width and height
-       if(!isset($this->width) || !isset($this->height)) {
-           return FALSE;
-       }
-       
-       if($this->width < 10 || $this->height < 10) {
-           return FALSE;
-       }
-       
-       if(!is_readable($srcImagePath)) {
-           return FALSE;
-       }
-       
-       // Here begins the job!
-       $info = \OCP\Image::getMimeTypeForFile($filePath);
-       $imageInfo = getimagesize($srcImagePath);
-       list($srcImageWidth, $srcImageHeight, $srcImageType) = $imageInfo;
+        }
 
-    /*
-     * string Image_type_to_mime_type ( int $Imagetype )
-     *   Imagetype           Returned value
-         IMAGETYPE_GIF 	Image/gif
-         IMAGETYPE_JPEG 	Image/jpeg
-         IMAGETYPE_PNG 	Image/png
-         IMAGETYPE_SWF 	application/x-shockwave-flash
-         IMAGETYPE_PSD 	Image/psd
-         IMAGETYPE_BMP 	Image/bmp
-         IMAGETYPE_TIFF_II (intel byte order) 	Image/tiff
-         IMAGETYPE_TIFF_MM (motorola byte order) 	Image/tiff
-         IMAGETYPE_JPC 	application/octet-stream
-         IMAGETYPE_JP2 	Image/jp2
-         IMAGETYPE_JPX 	application/octet-stream
-         IMAGETYPE_JB2 	application/octet-stream
-         IMAGETYPE_SWC 	application/x-shockwave-flash
-         IMAGETYPE_IFF 	Image/iff
-         IMAGETYPE_WBMP 	Image/vnd.wap.wbmp
-         IMAGETYPE_XBM 	Image/xbm
-         IMAGETYPE_ICO 	Image/vnd.microsoft.icon
+        if($this->width < 10 || $this->height < 10) {
+            return FALSE;
+        }
+        
+        if($this->imagick) {
+            $result = $this->generateImageThumbnailIM($viewPath, $srcImagePath, $dstImagePath);
+        } else {
+            $result = $this->generateImageThumbnailGD($viewPath, $srcImagePath, $dstImagePath);
+        }
+        
+        return $result;
+    }
+
+    /**
+     * Generate thumbnail of an Image with GD
+     * @param string $viewPath Source view path
+     * @param string $srcImagePath Source image path relative to the ownCloud fakeroot
+     * @param string $dstImagePath Destination image path
+     * @return boolean TRUE image generated successfully, FALSE otherwise
      */
-       
-       switch ($srcImageType) {
-           case IMAGETYPE_GIF:
-               $srcGDImage = imagecreatefromgif($srcImagePath);
-               break;
-           case IMAGETYPE_JPEG:
-               $srcGDImage = imagecreatefromjpeg($srcImagePath);
-               break;
-           case IMAGETYPE_PNG:
-               $srcGDImage = imagecreatefrompng($srcImagePath);
-               break;
-           
-           default :
-               return FALSE;
-       }
+   private function generateImageThumbnailGD($viewPath, $srcImagePath, $dstImagePath)
+   {
+        $view = new \OC\Files\View($viewPath);
+        $handle = $view->fopen($srcImagePath, 'r');
+        $image = new \OCP\Image($handle);
+        fclose($handle);
 
-       if ($srcGDImage === false) {
-           return FALSE;
-       }
-       
-       // Determine EXIF rotation of image
-       $exifData = new \oclife\exif\exifHandler($srcImagePath);
-       $srcGDImage = imagerotate($srcGDImage, $exifData->getRotation(), 0);
-       
-       // If image is rotated, swap width and height
-       if(abs($exifData->getRotation()) == 90) {
-           $srcImageWidth;
-           $srcImageHeight;
-           list($srcImageWidth, $srcImageHeight) = array($srcImageHeight, $srcImageWidth);
+        if ($image->valid()) {
+            $image->fixOrientation();
+            $image->resize(320);
+            $image->save($dstImagePath);
         }
        
-       // Compute aspect ratio
-       $srcAspectRatio = $srcImageWidth / $srcImageHeight;
+        return TRUE;
+   }
+
+    /**
+     * Generate thumbnail of an Image with ImageMagick
+     * @param string $viewPath Source view path
+     * @param string $srcImagePath Source image path relative to the ownCloud fakeroot
+     * @param string $dstImagePath Destination image path
+     * @return boolean TRUE image generated successfully, FALSE otherwise
+     */
+   private function generateImageThumbnailIM($viewPath, $srcImagePath, $dstImagePath)
+   {
+        $view = new \OC\Files\View($viewPath);
+        $handle = $view->fopen($srcImagePath, 'r');
+        
+        // In case we was unable to open the file, forfait
+        if($handle === FALSE) {
+            return FALSE;
+        }
+        
+        try {
+            $imageHandler = new \Imagick();
+            $imageHandler->readimagefile($handle);
+        } catch (Exception $exc) {
+            return FALSE;
+        }
+
+        // Get number of images and choose the best for the resolution of the thumbnail
+        //$imgsNumber = $imageHandler->getnumberimages();
+        $imageHandler->setiteratorindex(0);
+        
+        // Compute aspect ratio
+        $srcImgGeometry = $imageHandler->getImageGeometry();
+        $srcAspectRatio = $srcImgGeometry['width'] / $srcImgGeometry['height'];
        
-       $thumb_aspect_ratio = $width / $height;
+        $thumb_aspect_ratio = $this->width / $this->height;
        
-       if ($srcImageWidth <= $width && $srcImageHeight <= $height) {
-           $thumbImageWidth = $srcImageWidth;
-           $thumbImageHeight = $srcImageHeight;
-       } elseif ($thumb_aspect_ratio > $srcAspectRatio) {
-           $thumbImageWidth = intval($height * $srcAspectRatio);
-           $thumbImageHeight = $height;
-       } else {
-           $thumbImageWidth = $width;
-           $thumbImageHeight = intval($width / $srcAspectRatio);
-       }
+        if ($srcImgGeometry['width'] <= $this->width && $srcImgGeometry['height'] <= $this->height) {
+            $thumbImageWidth = $srcImgGeometry['width'];
+            $thumbImageHeight = $srcImgGeometry['height'];
+        } elseif ($thumb_aspect_ratio > $srcAspectRatio) {
+            $thumbImageWidth = intval($this->height * $srcAspectRatio);
+            $thumbImageHeight = $this->height;
+        } else {
+            $thumbImageWidth = $this->width;
+            $thumbImageHeight = intval($this->width / $srcAspectRatio);
+        }
        
         // Create new image structure
-        $verticalOffset = intval(($height - $thumbImageHeight) / 2);
-        $horizontalOffset = intval(($width - $thumbImageWidth) / 2);
-
-        $thumbGDImage = imagecreatetruecolor($width, $height);
+        $verticalOffset = intval(($this->height - $thumbImageHeight) / 2);
+        $horizontalOffset = intval(($this->width - $thumbImageWidth) / 2);
        
-        // Fill with background color
-        $bgColor = imagecolorallocate($thumbGDImage, $this->bgColor['red'], $this->bgColor['green'], $this->bgColor['blue']);
-        imagefilledrectangle($thumbGDImage, 0, 0, $thumbImageWidth, $thumbImageHeight, $bgColor);
-
         // Copy and save generated thumbnail
-        $fileName = pathinfo($srcImagePath);        
+        $imageHandler->thumbnailImage($thumbImageWidth, $thumbImageHeight);
+        $imageHandler->borderimage($this->htmlBgColor, $horizontalOffset, $verticalOffset);
         
-        $thumbImagePath = $fileName['dirname'] . $fileName['filename'] . '.png';
-        imagecopyresampled($thumbGDImage, $srcGDImage, $horizontalOffset, $verticalOffset, 0, 0, $thumbImageWidth, $thumbImageHeight, $srcImageWidth, $srcImageHeight);        
-        imagepng($thumbGDImage, $thumbImagePath, 2);
-
-        // Final cleanups
-        imagedestroy($srcGDImage);
-        imagedestroy($thumbGDImage);
+        $imageHandler->setImageFormat('png');
+        
+        try{
+            $imageHandler->writeimage($dstImagePath);
+        } catch(Exception $ex) {
+            return FALSE;
+        }
 
         return TRUE;
    }

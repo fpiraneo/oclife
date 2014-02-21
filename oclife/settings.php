@@ -20,7 +20,7 @@
 
 OCP\User::checkAdminUser();
 
-OCP\Util::addscript('oclife', 'admin');
+OCP\Util::addscript('oclife', 'oclife/admin');
 
 $onlyAdminCanEdit = intval(OCP\Config::getAppValue('oclife', 'onlyAdminCanEdit'));
 

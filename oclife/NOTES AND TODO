@@ -9,4 +9,7 @@ http://tutorialzine.com/2013/04/50-amazing-jquery-plugins/
 
 TODO:
  - Verificare calcolo della larghezza dell'editfield nell'inserimento delle tags
- - Inserire le note di licenza in testata ai files
+ - Trigger a file rename to refresh the thumbnail - May be a simple deletion of old thumbnail is fine
+ - Think about the localization
+ - Insert an admin option to use the ImageMagick vs the standard library to create the tag
+ - Check for a rotated image with GD and ImageMagick.

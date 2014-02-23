@@ -18,8 +18,8 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-OCP\JSON::checkLoggedIn();
-OCP\JSON::checkAppEnabled('oclife');
+\OCP\JSON::checkLoggedIn();
+\OCP\JSON::checkAppEnabled('oclife');
 
 $op = filter_input(INPUT_POST, 'op', FILTER_SANITIZE_STRING);
 $fileID = filter_input(INPUT_POST, 'fileID', FILTER_SANITIZE_NUMBER_INT);
@@ -31,12 +31,12 @@ $tagName = filter_input(INPUT_POST, 'tagName', FILTER_SANITIZE_STRING);
 
 switch($op) {
     case 'add': {
-        $result = OCA\OCLife\hTags::addTagForFile($fileID, $tagID);
+        $result = \OCA\OCLife\hTags::addTagForFile($fileID, $tagID);
         break;
     }
     
     case 'remove': {
-        $result = OCA\OCLife\hTags::removeTagForFile($fileID, $tagID);
+        $result = \OCA\OCLife\hTags::removeTagForFile($fileID, $tagID);
         break;
     }
 }

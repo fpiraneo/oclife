@@ -19,11 +19,11 @@
  */
 
 $onlyAdminCanEdit = intval(OCP\Config::getAppValue('oclife', 'onlyAdminCanEdit'));
-OCP\JSON::checkAppEnabled('oclife');
+\OCP\JSON::checkAppEnabled('oclife');
 if($onlyAdminCanEdit) {
-    OCP\User::checkAdminUser();
+    \OCP\User::checkAdminUser();
 } else {
-    OCP\JSON::checkLoggedIn();
+    \OCP\JSON::checkLoggedIn();
 }
 
 $tagID = filter_input(INPUT_POST, 'tagID', FILTER_SANITIZE_NUMBER_INT);
@@ -33,7 +33,7 @@ if($tagID === FALSE || $tagName === FALSE) {
     die('KO');
 }
 
-$ctags = new OCA\OCLife\hTags();
+$ctags = new \OCA\OCLife\hTags();
 
 $tagData = array('xx' => $tagName);
 

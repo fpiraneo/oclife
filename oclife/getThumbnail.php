@@ -21,13 +21,11 @@
 OCP\JSON::checkAppEnabled('oclife');
 OCP\JSON::checkLoggedIn();
 
-require __DIR__ . '/libs/imageHandler.php';
-
 // Revert parameters from ajax
 $fileID = intval(filter_input(INPUT_GET, 'fileid', FILTER_SANITIZE_NUMBER_INT));
 
 // Get current user
-$user = OCP\User::getUser();
+$user = \OCP\User::getUser();
 
 // Get file path
 $filePath = \OC\Files\Filesystem::getPath($fileID);
@@ -51,24 +49,25 @@ if (!is_dir($previewDir)) {
 
 // Check if thumbnail exist, create it otherwise
 if(!file_exists($thumbPath)) {
-    $imgHandler = new \oclife\imagehandler\ImageHandler();
+    $imgHandler = new \OCA\OCLife\ImageHandler();
     $imgHandler->setHeight(320);
     $imgHandler->setWidth(320);
-    $imgHandler->setBgColorFromValues(255, 255, 255);
+    $imgHandler->setBgColorFromValues(0, 0, 0);
     
     $imgHandler->generateImageThumbnail($viewPath, $filePath, $thumbPath);
 }
 
 // Output the preview
-$previewPath = (is_file($thumbPath)) ? $previewPath : $placeHolderPath;
-$fp = @fopen($thumbPath, 'rb');
-$mtime = filemtime($thumbPath);
-$size = filesize($thumbPath);
-$mime = \OC_Helper::getMimetype($thumbPath);
+$previewPath = (is_file($thumbPath)) ? $thumbPath : $placeHolderPath;
+$mtime = filemtime($previewPath);
+$size = filesize($previewPath);
+$mime = \OC_Helper::getMimetype($previewPath);
 
 \OCP\Response::enableCaching();
 \OCP\Response::setLastModifiedHeader($mtime);
+
 header('Content-Length: ' . $size);
 header('Content-Type: ' . $mime);
 
-fpassthru($fp);
+$fp = @fopen($previewPath, 'rb');
+@fpassthru($fp);

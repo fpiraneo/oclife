@@ -18,10 +18,10 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-OCP\JSON::checkLoggedIn();
-OCP\JSON::checkAppEnabled('oclife');
+\OCP\JSON::checkLoggedIn();
+\OCP\JSON::checkAppEnabled('oclife');
 
-$ctags = new OCA\OCLife\hTags();
+$ctags = new \OCA\OCLife\hTags();
 
 $JSONtags = filter_input(INPUT_POST, 'tags', FILTER_SANITIZE_URL);
 
@@ -40,12 +40,12 @@ foreach($tags as $tag) {
 }
 
 // Look for files with that tag
-$filesIDs = OCA\OCLife\hTags::getFileWithTagArray($tagsToSearch);
-$fileData = OCA\OCLife\utilities::getFileInfoFromID(OCP\User::getUser(), $filesIDs);
+$filesIDs = \OCA\OCLife\hTags::getFileWithTagArray($tagsToSearch);
+$fileData = \OCA\OCLife\utilities::getFileInfoFromID(OCP\User::getUser(), $filesIDs);
 
 $result = '';
 foreach($fileData as $file) {
-    $result .= OCA\OCLife\utilities::prepareTile($file);
+    $result .= \OCA\OCLife\utilities::prepareTile($file);
 }
 
 echo $result;

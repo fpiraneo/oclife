@@ -18,16 +18,13 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /**
  * Handle all data into the masterDocuments collection
  * NOTE: All informations stored on the document will be defined in the 'fileExplorer' class.
  * The only constraint is the presence of 'tags' field.
  */
 
-namespace oclife\imagehandler;
-require __DIR__ . '/../libs/exifHandler.php';
-
+namespace OCA\OCLife;
 class ImageHandler {
     private $handableImageType;
     private $width;
@@ -39,12 +36,12 @@ class ImageHandler {
     
     /**
      * Initialize Image data handler
-     * @param type $dbName Full name of database
-     * @param type $connection Reference of db connection
      */
     function __construct() {
         // Check if ImageMagick is enabled; use standard GD otherwise
-        $this->imagick = extension_loaded('imagick');
+        $useImageMagick = intval(\OCP\Config::getAppValue('oclife', 'useImageMagick'));
+        $this->imagick = extension_loaded('imagick') && $useImageMagick === 1;
+        
         if($this->imagick) {
             $this->handableImageType = array('gif', 'jpeg', 'jpg', 'png', 'bmp', 'xbm', 'nef', 'cr2', 'tif', 'pcd');
         } else {
@@ -109,7 +106,7 @@ class ImageHandler {
             return FALSE;
         }
         
-        $this->bgColor = array($red, $green, $blue);
+        $this->bgColor = array('red' => $red, 'green' => $green, 'blue' => $blue);
         return TRUE;
     }
     
@@ -286,13 +283,33 @@ class ImageHandler {
         $image = new \OCP\Image($handle);
         fclose($handle);
 
-        if ($image->valid()) {
-            $image->fixOrientation();
-            $image->resize(320);
-            $image->save($dstImagePath);
+        if (!$image->valid()) {
+            return FALSE;
         }
-       
-        return TRUE;
+        
+        $image->fixOrientation();
+        $image->resize($this->width);
+
+        $imageRsrc = $image->resource();
+
+        $height = $image->height();
+        $width = $image->width();
+
+        $widthOffset = intval(($this->width - $width) / 2);
+        $heightOffset = intval(($this->height - $height) / 2);
+
+        $thumbGDImage = imagecreatetruecolor($this->width, $this->height);
+
+        // Fill with background color
+        $bgColor = imagecolorallocate($thumbGDImage, $this->bgColor['red'], $this->bgColor['green'], $this->bgColor['blue']);
+        imagefilledrectangle($thumbGDImage, 0, 0, $this->width, $this->height, $bgColor);
+
+        imagecopyresampled($thumbGDImage, $imageRsrc, $widthOffset, $heightOffset, 0, 0, $width, $height, $width, $height);
+
+        imagepng($thumbGDImage, $dstImagePath, 7);
+        imagedestroy($thumbGDImage);
+
+        return TRUE;       
    }
 
     /**

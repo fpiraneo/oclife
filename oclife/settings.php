@@ -20,11 +20,20 @@
 
 OCP\User::checkAdminUser();
 
-OCP\Util::addscript('oclife', 'oclife/admin');
+OCP\Util::addscript('oclife', 'oclife/oclife_admin');
 
 $onlyAdminCanEdit = intval(OCP\Config::getAppValue('oclife', 'onlyAdminCanEdit'));
+$useImageMagick = intval(OCP\Config::getAppValue('oclife', 'useImageMagick'));
 
-$tmpl = new OCP\Template('oclife', 'settings');
+$tmpl = new \OCP\Template('oclife', 'settings');
 $tmpl->assign('onlyAdminCanEdit', ($onlyAdminCanEdit === 1) ? 'CHECKED' : '');
+$tmpl->assign('useImageMagick', ($useImageMagick === 1) ? 'CHECKED' : '');
+
+$imagick = extension_loaded('imagick');
+$imagickEnabled = $imagick ? "ImageMagick is loaded and ready to be used" : "ImageMagick is not loaded: Please refers to php manual.";
+$tmpl->assign('imagickEnabled', $imagickEnabled);
+
+$tmpl->assign('enImageMagick', $imagick ? '' : 'disabled="DISABLED"');
+$tmpl->assign('imagickMessageColor', $imagick ? 'green' : 'red');
 
 return $tmpl->fetchPage();

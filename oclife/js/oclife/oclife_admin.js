@@ -1,8 +1,9 @@
 $(function() {
-    $( "#onlyAdminCanEdit" )
+    $( "#oclife_settings" )
         .click(function() {
             var dataPath = OC.filePath('oclife', 'ajax', 'savePrefs.php');
-            var v_onlyAdminCanEdit = onlyAdminCanEdit.value;
+            var v_onlyAdminCanEdit = $('#onlyAdminCanEdit').is(":checked");
+            var v_useImageMagick = $('#useImageMagick').is(":checked");
             
             $.ajax({
                 url: dataPath,
@@ -10,7 +11,8 @@ $(function() {
                 timeout: 2000,
 
                 data: {
-                    onlyAdminCanEdit: v_onlyAdminCanEdit
+                    onlyAdminCanEdit: v_onlyAdminCanEdit,
+                    useImageMagick: v_useImageMagick
                 },
 
                 type: "POST",

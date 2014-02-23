@@ -18,14 +18,13 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /**
  * EXIF related utilities
  *
  * @author fpiraneo
  */
 
-namespace oclife\exif;
+namespace \OCA\OCLife;
 
 class exifHandler {
     private $imagePath;

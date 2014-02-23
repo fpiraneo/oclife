@@ -18,10 +18,10 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-OCP\JSON::checkLoggedIn();
-OCP\JSON::checkAppEnabled('oclife');
+\OCP\JSON::checkLoggedIn();
+\OCP\JSON::checkAppEnabled('oclife');
 
-$ctags = new OCA\OCLife\hTags();
+$ctags = new \OCA\OCLife\hTags();
 $tagData = $ctags->getAllTags('xx');
 
 $searchKey = filter_input(INPUT_GET, 'term', FILTER_SANITIZE_STRING);
@@ -30,10 +30,10 @@ $result = array();
 
 foreach($tagData as $tag) {
     if(is_null($searchKey) || $searchKey === FALSE || $searchKey === '') {
-        $result[] = new OCA\OCLife\tag($tag['tagid'], $tag['descr']);
+        $result[] = new \OCA\OCLife\tag($tag['tagid'], $tag['descr']);
     } else {
         if(strpos($tag['descr'], $searchKey) !== FALSE) {
-            $result[] = new OCA\OCLife\tag($tag['tagid'], $tag['descr']);
+            $result[] = new \OCA\OCLife\tag($tag['tagid'], $tag['descr']);
         }
     }
 }

@@ -34,7 +34,7 @@ if($parentID === FALSE || $tagName === FALSE || strlen($tagLang) === 0 || strlen
     die('KO-0');
 }
 
-$ctags = new OCA\OCLife\hTags();
+$ctags = new \OCA\OCLife\hTags();
 
 $newTagID = $ctags->newTag($tagLang, $tagName, $parentID);
 

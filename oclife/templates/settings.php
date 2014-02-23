@@ -18,10 +18,19 @@
 -->
 
 
-<form id="external">
+<form id="oclife_settings">
         <fieldset class="personalblock">
                 <h2>Tags</h2>
-                <input type="checkbox" id="onlyAdminCanEdit" name="onlyAdminCanEdit" <?php p($_['onlyAdminCanEdit']) ?> />
-                <label for="onlyAdminCanEdit">Only admins can edit tags</label>
+                <div>
+                    <input type="checkbox" id="onlyAdminCanEdit" name="onlyAdminCanEdit" <?php p($_['onlyAdminCanEdit']) ?> />
+                    <label for="onlyAdminCanEdit">Only admins can edit tags</label>
+                </div>
+
+                <div>
+                    <input type="checkbox" id="useImageMagick" name="useImageMagick" <?php p($_['useImageMagick']) ?> <?php p($_['enImageMagick']) ?>/>
+                    <label for="useImageMagick">Use ImageMagick instead of GD (More image formats handled)</label>
+                </div>
+                
+                <div style="color:<?php p($_['imagickMessageColor']) ?>;"><?php p($_['imagickEnabled']) ?></div>
         </fieldset>
 </form>

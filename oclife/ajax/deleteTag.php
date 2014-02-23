@@ -32,7 +32,7 @@ if($tagID === FALSE) {
     die('KO');
 }
 
-$ctags = new OCA\OCLife\hTags();
+$ctags = new \OCA\OCLife\hTags();
 
 $deletedTags = $ctags->deleteTagAndChilds(intval($tagID));
 

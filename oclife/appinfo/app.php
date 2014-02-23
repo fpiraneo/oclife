@@ -54,3 +54,4 @@
 
 // Register filesystem hooks to remove thumbnails and tags DB entries
 \OCP\Util::connectHook('OC_Filesystem', 'delete', 'OCA\OCLife\utilities', 'cleanupForDelete');
+\OCP\Util::connectHook('OC_Filesystem', 'rename', 'OCA\OCLife\utilities', 'cleanupForRename');

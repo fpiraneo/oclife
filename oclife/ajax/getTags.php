@@ -18,10 +18,10 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-OCP\JSON::checkLoggedIn();
-OCP\JSON::checkAppEnabled('oclife');
+\OCP\JSON::checkLoggedIn();
+\OCP\JSON::checkAppEnabled('oclife');
 
-$ctags = new OCA\OCLife\hTags();
+$ctags = new \OCA\OCLife\hTags();
 $tagData = $ctags->getTagTree('xx');
 $jsonTagData = json_encode($tagData);
 echo $jsonTagData;

@@ -18,13 +18,12 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\OCLife;
-
 /**
  * Define an object 'tag'
  *
  * @author fpiraneo
  */
+namespace OCA\OCLife;
 class tag {
     public $value;
     public $label;

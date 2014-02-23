@@ -18,13 +18,12 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace OCA\OCLife;
-
 /**
  * Handle hierarchical structure of tags; in DB the structure of tag will be:
  * 
  * @author fpiraneo
  */
+namespace OCA\OCLife;
 class hTags {        
     /**
      * Returns the tag ID of an existing tag

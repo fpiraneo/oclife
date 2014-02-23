@@ -33,7 +33,7 @@ if($tagID === FALSE || $parentID === FALSE) {
     die('KO');
 }
 
-$ctags = new OCA\OCLife\hTags();
+$ctags = new \OCA\OCLife\hTags();
 $ctags->setTagParentByID($tagID, $parentID);
 
 echo 'OK';

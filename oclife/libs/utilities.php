@@ -19,7 +19,6 @@
  */
 
 namespace OCA\OCLife;
-
 class utilities {
     /**
      * Format a file size in human readable form
@@ -47,19 +46,12 @@ class utilities {
     
     /**
      * Remove thumbnails and db entries for deleted files
-     * @param type $params
+     * @param array $params All parameters passed by hook
      */
     public static function cleanupForDelete($params) {
         // Get full thumbnail path
         $path = $params['path'];
-        $user = \OCP\USER::getUser();
-        $previewDir = \OC_User::getHome($user) . '/oclife/previews/' . $user;
-        $thumbPath = $previewDir . $path;
-        
-        // If thumbnail exists remove it
-        if (file_exists($thumbPath)) {
-            unlink($thumbPath);
-        }
+        \OCA\OCLife\utilities::deleteThumb($path);
 
         // Now remove all entry in DB for this file
         // -- Verificare che qui esista l'entry del file nel DB!!! :-///
@@ -68,6 +60,33 @@ class utilities {
             $result = \OCA\OCLife\hTags::removeAllTagsForFile($fileInfos['fileid']);
         }
         return $result;
+    }
+    
+    /**
+     * Rename thumbnail after file rename
+     * @param array $params All parameters passed by hook
+     */
+    public static function cleanupForRename($params) {
+        $oldPath = $params['oldpath'];
+        \OCA\OCLife\utilities::deleteThumb($oldPath);
+        return TRUE;
+    }
+
+    /**
+     * Delete thumb from filesystem if exists
+     * @param string $thumbPath
+     */
+    private static function deleteThumb($thumbPath) {
+        // Get full thumbnail path
+        $fileInfo = pathinfo($thumbPath);
+        $user = \OCP\USER::getUser();
+        $previewDir = \OC_User::getHome($user) . '/oclife/previews/' . $user;
+        $fullThumbPath = $previewDir . $fileInfo['dirname'] . '/' . $fileInfo['filename'] . '.png';
+        
+        // If thumbnail exists remove it
+        if(file_exists($fullThumbPath)) {
+            unlink($fullThumbPath);
+        }        
     }
     
     /**

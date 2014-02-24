@@ -69,7 +69,8 @@ Note: The `.../appinfo/info.xml` contains some behaviour of oclife under ownClou
 
 After unzipping the downloaded archive under the `apps` directory of ownCloud, the app has to be activated; login on ownCloud as `administrator` (note: the actual administrator's username can be different following your installation), in the lower left corner of the page you can find the `apps` menu icon; recall it then browse the app listing to look for `oclife`; select and enable it.
 
-After returning to the main page a new `Tags` icon on the left menu bar should appears; select it; a single item called `root` is displayed: That is the root tag, parent of all the tags you will create.
+#How to use
+On the main page a new `Tags` icon on the left menu bar should appears; select it; a single item called `root` is displayed: That is the root tag, parent of all the tags you will create.
 
 A right click on the `root` tag shows the contextual menu; choose `New` to enter a new tag.
 As you can see there are other two options like `Rename` and `Delete` which the meanings and usage should be trivial.
@@ -79,16 +80,20 @@ As you can see there are other two options like `Rename` and `Delete` which the 
 A small note about the icon of each tag: the `globe`. This icon means that the tag is `global`: A global tag (as the name implies) is visible to all the users of that installation of ownCloud! In a near future I'll implements also personal tags (with different icon of course!).
 
 There is also an alternative way to create tags.
-Browsing the files listing and hoovering over a file, the actions icons will appears; you note a new icon called `Informations`; clicking on it opens a popup with basic informations on that file and a tagbox on the bottom; insert there 
-
-
-#How to use
+Browsing the files listing and hoovering over a file, the actions icons will appears; you note a new icon called `Informations`; clicking on it opens a popup with basic informations on that file and a tagbox on the bottom; insert there the tag you like to create and hit enter; a popup asking for confirmation appears: confirm and the tag will be created.
 
 #Future developments
+Again, this is just the first release of the app and features can be added or improved.
 
 ##Localizations
+Actually only the English language is implemented; the localization infrastructure will be added in the next future; I can provide localization file for Italian and French; for other languages feels free to send me your contribute.
+
 ##Multiple languages tags
+I'm a Swiss resident; in Switzerland we currently use four languages plus English; the localization not only of the application but also of the data is a must. The infrastructure to add a single tag with multiple language is present; it need to be handled by the logic.
+
 ##Direct access to a file
+On the main tag window, clicking on a thumbnail, a popup with the ownCloud path of the file appears, stating where user can find the indicated file.
+
 ##Sharing by tags
 ##Multiple hierarchy
 ##Personal vs. Global tags

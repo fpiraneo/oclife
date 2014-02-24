@@ -114,3 +114,9 @@ Not all functionality works with encrypted files, i.e. image rotations, EXIF dat
 After renaming a file the *work in progress* is shown forever; my suspect is trouble in the ownCloud infrastructures to handle the *file rename* hook.
 
 #Special thanks to
+This app has been written in my spare time and on a train between Bellinzona and Mezzovico, on the path between my house and the company where I work.
+My first thank is for my wife - Thank you very much for her patience! It's not an easy task to live with a software engineer.
+
+Special thanks to the people that wrote ownCloud: The code is clear, well commented and easy to understand; try to read the MediaWiki code and you'll understand me! ;-)
+
+Last but not least thanks to *ragulka*, the author of `bootstrap-tokenfield`; his help was precious while debugging!

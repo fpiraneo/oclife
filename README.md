@@ -3,7 +3,7 @@ oclife
 
 Tagging and getting extended document informations on ownCloud.
 
-IMPORTANT NOTE: This project is in development stage and should not be used in production environment and / or with important data. Nor the author nor any other thirty party can be responsible for any damage or data loss.
+**IMPORTANT NOTE:** This project is in development stage and should not be used in production environment and / or with important data. Nor the author nor any other thirty party can be responsible for any damage or data loss.
 
 #About this document
 This document has been written by Francesco Piraneo G. the author of oclife referring to the version committed on February 23 2014. Contained informations may not apply to future releases of oclife. I’m an Italian mother tongue so I’m very sorry for any mistake made editing this document: Please feel free to submit improvements.
@@ -25,14 +25,14 @@ Few words on the concept of hierarchy: As above I plan to use this product with 
 
 Simply declaring a tag structure like the following can solve the issue:
 
-Europe
-+-United Kingdom
-  +-England
-    +-London
-  +-Scotland
-    +-Edinburgh
-  +-Wales
-    +-Wrexham
+    Europe
+    +-United Kingdom
+      +-England
+      +-London
+    +-Scotland
+      +-Edinburgh
+    +-Wales
+      +-Wrexham
 
 On tag window I can choose the `United Kingdom` tag to let all the pictures taken in `London`, `Wrexham` and `Edinburgh` appears.
 
@@ -74,7 +74,7 @@ After returning to the main page a new `Tags` icon on the left menu bar should a
 A right click on the `root` tag shows the contextual menu; choose `New` to enter a new tag.
 As you can see there are other two options like `Rename` and `Delete` which the meanings and usage should be trivial.
 
-Note: Of course you cannot rename or delete the `root` tag!
+**Note:** Of course you cannot rename or delete the `root` tag!
 
 A small note about the icon of each tag: the `globe`. This icon means that the tag is `global`: A global tag (as the name implies) is visible to all the users of that installation of ownCloud! In a near future I'll implements also personal tags (with different icon of course!).
 

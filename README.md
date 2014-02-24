@@ -62,6 +62,9 @@ oclife uses thirty party modules and library to perform his job; standard module
 
 Both modules can be downloaded on the developer’s page at GitHub; for sake of simplicity they will be distributed with oclife leaving untouched the original license and credits.
 
+##ImageMagick vs. GD
+oclife can be used with standard GD graphic library integrated in PHP; GD can handle a limitate number of graphical image format; ImageMagic allows more flexibility but it must be installed manually. Once ImageMagic is installed, it will be sensed automatically by oclife and the usage should be activated manually on the `admin` page by an administrator.
+
 #Installation
 oclife can be downloaded from github (hitting "Download ZIP" pushbutton) then installed under your ownCloud installation directory then the `apps` subdirectory.
 
@@ -92,15 +95,22 @@ Actually only the English language is implemented; the localization infrastructu
 I'm a Swiss resident; in Switzerland we currently use four languages plus English; the localization not only of the application but also of the data is a must. The infrastructure to add a single tag with multiple language is present; it need to be handled by the logic.
 
 ##Direct access to a file
-On the main tag window, clicking on a thumbnail, a popup with the ownCloud path of the file appears, stating where user can find the indicated file.
+On the main tag window, clicking on a thumbnail, a popup with the ownCloud path of the file appears, stating where user can find the indicated file. The recall of the `File` app standard functionality (like download or show PDF for PDF file) should be nice; unfortunately I can't understand how I can integrate this feature in the ownCloud infrastructure. **HELP WANTED!!! :-)**
 
 ##Sharing by tags
+Allows the user to share a link with a token indicating a slideshow or an album with files with such tags. To be evaluated.
+
 ##Multiple hierarchy
+Tags with multiple parents; consider the files related to `Blaise Pascal` that can be a child of `Scientists` and of `French personalities`; both are corrects and on large archives can be a great added value.
+
 ##Personal vs. Global tags
+All tags are actually **global**, this means that all the users of one installation of ownCloud can see all the tags; personal tags allows to define tags related to a single user that cannot be seen by others.
 
 ##Known issues
-###ImageMagick vs. GD
 ###Encrypted files
+Not all functionality works with encrypted files, i.e. image rotations, EXIF data readings and so on. We suggest to keep the data unencrypted.
+
 ###Rename a file
+After renaming a file the *work in progress* is shown forever; my suspect is trouble in the ownCloud infrastructures to handle the *file rename* hook.
 
 #Special thanks to

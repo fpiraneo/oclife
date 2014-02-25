@@ -1,0 +1,70 @@
+-- phpMyAdmin SQL Dump
+-- version 4.0.9
+-- http://www.phpmyadmin.net
+--
+-- Host: localhost
+-- Generato il: Feb 24, 2014 alle 11:28
+-- Versione del server: 5.6.14
+-- Versione PHP: 5.4.17
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET time_zone = "+00:00";
+
+--
+-- Database: `oc`
+--
+
+--
+-- Dump dei dati per la tabella `oc_oclife_humanReadable`
+--
+
+INSERT INTO `oc_oclife_humanReadable` (`tagid`, `lang`, `descr`) VALUES
+(1, 'xx', 'Svizzera'),
+(2, 'xx', 'Italia'),
+(3, 'xx', 'Francia'),
+(4, 'xx', 'Ticino'),
+(5, 'xx', 'Bellinzona'),
+(6, 'xx', 'Morbio Inferiore'),
+(7, 'xx', 'Lugano'),
+(8, 'xx', 'Lombardia'),
+(9, 'xx', 'Castano Primo'),
+(10, 'xx', 'Gallarate'),
+(11, 'xx', 'Bretagna'),
+(12, 'xx', 'Quimper'),
+(13, 'xx', 'Penmarch'),
+(14, 'xx', 'Grigioni'),
+(15, 'xx', 'Scuol'),
+(16, 'xx', 'St. Moritz'),
+(17, 'xx', 'Julierpass'),
+(18, 'xx', 'Zernez'),
+(19, 'xx', 'Europa'),
+(20, 'xx', 'Sicilia'),
+(21, 'xx', 'Emilia Romagna'),
+(22, 'xx', 'Sortino'),
+(23, 'xx', 'Bologna'),
+(24, 'xx', 'Rimini'),
+(25, 'xx', 'Siracusa'),
+(26, 'xx', 'Grecia'),
+(27, 'xx', 'Rodi'),
+(28, 'xx', 'Persone'),
+(29, 'xx', 'Ilaria CANEPA'),
+(30, 'xx', 'Regno Unito'),
+(31, 'xx', 'Inghilterra'),
+(32, 'xx', 'Fantascenza'),
+(33, 'xx', 'Ritratti'),
+(34, 'xx', 'Rendering'),
+(35, 'xx', 'Scozia'),
+(36, 'xx', 'Val Verzasca'),
+(37, 'xx', 'Corippo'),
+(38, 'xx', 'Galles'),
+(39, 'xx', 'Stati Uniti (USA)'),
+(40, 'xx', 'Arkansas'),
+(41, 'xx', 'Maryland'),
+(42, 'xx', 'Baltimora'),
+(43, 'xx', 'Little Rock'),
+(44, 'xx', 'Virginia'),
+(45, 'xx', 'Washington'),
+(46, 'xx', 'California'),
+(47, 'xx', 'Los Angeles'),
+(48, 'xx', 'RAW'),
+(49, 'xx', 'Natura');

@@ -238,7 +238,26 @@ class ImageHandler {
             \OC_Response::setStatus(\OC_Response::STATUS_NOT_FOUND);
         }        
     }
-    
+
+    /**
+     * Return actual rotation of image
+     * @return int Degrees of rotation
+     */
+    private function getRotation($rotation) {
+        switch(intval($rotation)) { 
+            case 8: 
+                return -90;
+            case 3: 
+                return 180;
+            case 6: 
+                return 90;
+            default :
+                return 0;
+        }           
+
+        return 0;
+    }
+
     /**
      * Generate thumbnail of an image
      * @param string $srcImagePath Source image path
@@ -339,7 +358,10 @@ class ImageHandler {
 
         // Get number of images and choose the best for the resolution of the thumbnail
         //$imgsNumber = $imageHandler->getnumberimages();
+        $imageInfo = $imageHandler->getImageProperties();
+        $orientation = \OCA\OCLife\ImageHandler::getRotation($imageInfo['exif:Orientation']);
         $imageHandler->setiteratorindex(0);
+        $imageHandler->rotateImage($this->htmlBgColor, $orientation); 
         
         // Compute aspect ratio
         $srcImgGeometry = $imageHandler->getImageGeometry();

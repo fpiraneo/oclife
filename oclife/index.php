@@ -32,7 +32,7 @@ OCP\App::setActiveNavigationEntry('oclife');
 
 // THEN execute what needed by us...
 \OCP\Util::addStyle('oclife', 'oclife');
-\OCP\Util::addScript('oclife', 'oclife/tagstree');
+\OCP\Util::addScript('oclife', 'oclife/oclife_tagstree');
 
 // Look up other security checks in the docs!
 \OCP\User::checkLoggedIn();

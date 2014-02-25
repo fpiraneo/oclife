@@ -279,14 +279,15 @@ class ImageHandler {
    private function generateImageThumbnailGD($viewPath, $srcImagePath, $dstImagePath)
    {
         $view = new \OC\Files\View($viewPath);
-        $handle = $view->fopen($srcImagePath, 'r');
-        $image = new \OCP\Image($handle);
-        fclose($handle);
+
+        $imageLocalPath = $view->getLocalFile($srcImagePath);
+        $image = new \OCP\Image();
+        $image->loadFromFile($imageLocalPath);
 
         if (!$image->valid()) {
             return FALSE;
         }
-        
+        //Non legge il path
         $image->fixOrientation();
         $image->resize($this->width);
 

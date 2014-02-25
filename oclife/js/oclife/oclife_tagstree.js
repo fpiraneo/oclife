@@ -170,6 +170,11 @@ $(function(){
                         switch(action) {
                             case 'edit': {
                                 var node = $("#tagstree").fancytree("getActiveNode");
+                                
+                                if(node.key == -1) {
+                                    updateStatusBar("Editing of Root node not allowed!");
+                                    break;
+                                }
 
                                 tagName.value = node.title;
                                 tagID.value = node.key;
@@ -191,6 +196,10 @@ $(function(){
                             case 'delete': {
                                 var node = $("#tagstree").fancytree("getActiveNode");
 
+                                if(node.key == -1) {
+                                    updateStatusBar("Deleting of Root node not allowed!");
+                                    break;
+                                }
                                 $("#tagToDelete").text(node.title);
                                 deleteID.value = node.key;
 

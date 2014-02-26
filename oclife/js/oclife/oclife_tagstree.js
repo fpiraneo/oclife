@@ -176,8 +176,8 @@ $(function(){
                                     break;
                                 }
 
-                                tagName.value = node.title;
-                                tagID.value = node.key;
+                                $("#tagName").val(node.title);
+                                $("#tagID").val(node.key);
 
                                 $( "#renameTag" ).dialog( "open" );
                                 break;
@@ -308,52 +308,9 @@ $(function(){
             modal: true,
             resizable: false,
             buttons: {
-                "Conferma": function() {
-                    var bValid = true;
-                    allFields.removeClass( "ui-state-error" );
-                    bValid = bValid && checkLength( newTagName, 1, 20 );
-
-                    if ( bValid ) {
-                        var newValue = newTagName.value;
-                        var parent = parentID.value;
-                        
-                        var dataPath = OC.filePath('oclife', 'ajax', 'createTag.php');
-
-                        $.ajax({
-                            url: dataPath,
-                            async: false,
-                            timeout: 2000,
-                            
-                            data: {
-                                parentID: parent,
-                                tagName: newValue,
-                                tagLang: "xx"
-                            },
-                            
-                            type: "POST",
-                            
-                            success: function( result ) {                                
-                                var resArray = result.split("-");
-                                if(resArray[0] === 'OK') {
-                                    var node = $("#tagstree").fancytree("getActiveNode");
-
-                                    var nodeData = {'title': newValue, 'key': parseInt(resArray[1])};
-                                    node.addChildren(nodeData);
-                                    node.setExpanded(true);
-                                    
-                                    updateStatusBar("Tag created successfully!");
-                                } else {
-                                    updateStatusBar("Unable to create! DB error!");
-                                }
-                            },
-
-                            error: function( xhr, status ) {
-                                updateStatusBar("Unable to create! Ajax error!");
-                            }                            
-                        });                        
-                        
-                        $( this ).dialog( "close" );                        
-                    }
+                Confirm: {
+                    text: "Confirm",
+                    click: insertTag()
                 },
             
                 Cancel: {
@@ -368,6 +325,66 @@ $(function(){
                 allFields.val( "" ).removeClass( "ui-state-error" );
             }
         });
+        
+        $("#createTag").on('keypress', function(e) {
+            var code = (e.keyCode ? e.keyCode : e.which);
+            if(code === 13) {
+                e.preventDefault();
+                insertTag();
+            }
+        });
+
+        function insertTag() {
+            var bValid = true;
+            allFields.removeClass( "ui-state-error" );
+            bValid = bValid && checkLength( newTagName, 1, 20 );
+
+            if ( bValid ) {
+                var newValue = newTagName.value;
+                var parent = parentID.value;
+
+                var dataPath = OC.filePath('oclife', 'ajax', 'createTag.php');
+
+                $.ajax({
+                    url: dataPath,
+                    async: false,
+                    timeout: 2000,
+
+                    data: {
+                        parentID: parent,
+                        tagName: newValue,
+                        tagLang: "xx"
+                    },
+
+                    type: "POST",
+
+                    success: function( result ) {                                
+                        var resArray = jQuery.parseJSON(result);
+                        if(resArray.result === 'OK') {
+                            var node = $("#tagstree").fancytree("getActiveNode");
+
+                            var nodeData = {
+                                'title': resArray.title,
+                                'key': parseInt(resArray.key),
+                                'class': resArray.class
+                            };
+                            node.addChildren(nodeData);
+                            node.setExpanded(true);
+
+                            updateStatusBar("Tag created successfully!");
+                        } else {
+                            updateStatusBar("Unable to create! DB error!");
+                        }
+                    },
+
+                    error: function( xhr, status ) {
+                        updateStatusBar("Unable to create! Ajax error!");
+                    }                            
+                });                        
+
+                $('#createTag').dialog( "close" );                        
+            }
+        }
 
         $( "#deleteConfirm" ).dialog({
             resizable: false,

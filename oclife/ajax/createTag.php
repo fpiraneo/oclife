@@ -31,15 +31,32 @@ $tagName = filter_input(INPUT_POST, 'tagName', FILTER_SANITIZE_STRING);
 $tagLang = filter_input(INPUT_POST, 'tagLang', FILTER_SANITIZE_STRING);
 
 if($parentID === FALSE || $tagName === FALSE || strlen($tagLang) === 0 || strlen($tagLang) > 2) {
-    die('KO-0');
-}
-
-$ctags = new \OCA\OCLife\hTags();
-
-$newTagID = $ctags->newTag($tagLang, $tagName, $parentID);
-
-if($newTagID === FALSE) {
-    echo 'KO-1';
+    $result = array(
+        'result' => 'KO',
+        'title' => '',
+        'key' => '',
+        'class' => ''
+    );
 } else {
-    echo 'OK-' . $newTagID;
+    $ctags = new \OCA\OCLife\hTags();
+
+    $newTagID = $ctags->newTag($tagLang, $tagName, $parentID);
+
+    if($newTagID === FALSE) {
+        $result = array(
+            'result' => 'KO',
+            'title' => '',
+            'key' => '',
+            'class' => ''
+        );
+    } else {
+        $result = array(
+            'result' => 'OK',
+            'title' => $tagName,
+            'key' => $newTagID,
+            'class' => 'global'
+        );
+    }
 }
+
+echo json_encode($result);

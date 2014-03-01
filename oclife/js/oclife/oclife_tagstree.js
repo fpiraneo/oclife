@@ -240,52 +240,15 @@ $(function(){
                     }, 5000);            
         }
 
-        $( "#renameTag" ).dialog({
+        $("#renameTag").dialog({
             autoOpen: false,
             height: 200,
             width: 350,
             modal: true,
             resizable: false,
             buttons: {
-                "Conferma": function() {
-                    var bValid = true;
-                    allFields.removeClass( "ui-state-error" );
-                    bValid = bValid && checkLength( tagName, 1, 20 );
-
-                    if ( bValid ) {
-                        var newValue = tagName.value;
-                        var tagToMod = tagID.value;
-                        
-                        $.ajax({
-                            url: OC.filePath('oclife', 'ajax', 'renameTag.php'),
-                            async: false,
-                            timeout: 2000,
-                            
-                            data: {
-                                tagID: tagToMod,
-                                tagName: newValue
-                            },
-                            
-                            type: "POST",
-                            
-                            success: function( result ) {
-                                if(result === 'OK') {
-                                    var node = $("#tagstree").fancytree("getActiveNode");
-                                    node.setTitle(newValue);
-                                    
-                                    updateStatusBar("Rename done!");
-                                } else {
-                                    updateStatusBar("Unable to rename! DB error!");
-                                }
-                            },
-
-                            error: function( xhr, status ) {
-                                updateStatusBar("Unable to rename! Ajax error!");
-                            }                            
-                        });                        
-                        
-                        $( this ).dialog( "close" );                        
-                    }
+                "Confirm": function() {
+                    renameTag();
                 },
             
                 Cancel: {
@@ -301,6 +264,67 @@ $(function(){
             }
         });
         
+        $("#renameTag").on('keypress', function(e) {
+            var code = (e.keyCode ? e.keyCode : e.which);
+            if(code === 13) {
+                e.preventDefault();
+                renameTag();
+            }
+        });
+        
+        function renameTag() {
+            var bValid = true;
+            allFields.removeClass( "ui-state-error" );
+            bValid = bValid && checkLength( tagName, 1, 20 );
+
+            if ( bValid ) {
+                var newValue = tagName.value;
+                var tagToMod = tagID.value;
+
+                $.ajax({
+                    url: OC.filePath('oclife', 'ajax', 'tagOps.php'),
+                    async: false,
+                    timeout: 2000,
+
+                    data: {
+                        tagOp: 'rename',
+                        tagID: tagToMod,
+                        tagName: newValue,
+                        tagLang: 'xx'
+                    },
+
+                    type: "POST",
+
+                    success: function(result) {
+                        var resultData = jQuery.parseJSON(result);
+
+                        if(resultData.result === 'OK') {
+                            var parentNode = $("#tagstree").fancytree("getActiveNode").getParent();
+                            $("#tagstree").fancytree("getActiveNode").remove();
+
+                            var nodeData = {
+                                'title': resultData.title,
+                                'key': parseInt(resultData.key),
+                                'class': resultData.class
+                            };
+                            var newNode = parentNode.addChildren(nodeData);
+                            newNode.setActive(true);
+
+                            updateStatusBar("Rename done!");
+                        } else {
+                            updateStatusBar("Unable to rename! DB error!");
+                        }
+                    },
+
+                    error: function( xhr, status ) {
+                        updateStatusBar("Unable to rename! Ajax error!");
+                    }                            
+                });                        
+
+                $("#renameTag").dialog( "close" );                        
+            }
+        }
+        
         $( "#createTag" ).dialog({
             autoOpen: false,
             height: 200,
@@ -308,9 +332,8 @@ $(function(){
             modal: true,
             resizable: false,
             buttons: {
-                Confirm: {
-                    text: "Confirm",
-                    click: insertTag()
+                "Confirm": function() {
+                    insertTag()
                 },
             
                 Cancel: {
@@ -343,14 +366,13 @@ $(function(){
                 var newValue = newTagName.value;
                 var parent = parentID.value;
 
-                var dataPath = OC.filePath('oclife', 'ajax', 'createTag.php');
-
                 $.ajax({
-                    url: dataPath,
+                    url: OC.filePath('oclife', 'ajax', 'tagOps.php'),
                     async: false,
                     timeout: 2000,
 
                     data: {
+                        tagOp: 'new',
                         parentID: parent,
                         tagName: newValue,
                         tagLang: "xx"
@@ -368,8 +390,9 @@ $(function(){
                                 'key': parseInt(resArray.key),
                                 'class': resArray.class
                             };
-                            node.addChildren(nodeData);
+                            var newNode = node.addChildren(nodeData);
                             node.setExpanded(true);
+                            newNode.setActive(true);
 
                             updateStatusBar("Tag created successfully!");
                         } else {
@@ -401,7 +424,6 @@ $(function(){
                 "Cancella": function() {
                     $( this ).dialog( "close" );
                     
-                    var dataPath = OC.filePath('oclife', 'ajax', 'deleteTag.php');
                     var tagID = deleteID.value;
                     
                     if(tagID === "-1") {
@@ -410,18 +432,24 @@ $(function(){
                     }
                     
                     $.ajax({
-                        url: dataPath,
+                        url: OC.filePath('oclife', 'ajax', 'tagOps.php'),
                         async: false,
                         timeout: 2000,
 
                         data: {
+                            tagOp: 'delete',
+                            parentID: '-1',
+                            tagName: '',
+                            tagLang: "xx",                            
                             tagID: tagID
                         },
 
                         type: "POST",
 
-                        success: function( result ) {
-                            if(result === 'OK') {
+                        success: function(result) {
+                            var resArray = jQuery.parseJSON(result);
+                            
+                            if(resArray.result === 'OK') {
                                 $("#tagstree").fancytree("getActiveNode").remove();
                                 updateStatusBar("Tags removed successfully!");
                             } else {

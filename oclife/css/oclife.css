@@ -17,17 +17,8 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-div.oclife_content {
-    position: relative;
-    height: 100%;
-}
-
 div.oclife_toolbar {
-    padding: 4px;
-    display: inline-block;
-    background-color: rgb(238, 238, 238);
-    width: 100%;
+    background-color: lightgray;
 }
 
 span.oclife_header {
@@ -37,15 +28,22 @@ span.oclife_header {
     font-weight: bold;
 }
 
-div.oclife_tagtree {
-    width: 600px;
+div.oclife_content {
     height: 100%;
-    float: left;
 }
 
-div.oclife_filetable {
-    height: 100%;
-    border: 1px solid darkgray;    
+div.west {
+    width: 25%;
+    background-color: white;
+    border: 1px solid gray;
+    display: inline-block;
+}
+
+div.center {
+    background-color: white;
+    border: 1px solid gray;
+    text-align: center;
+    display: inline-block;
 }
 
 p.oclife_title {

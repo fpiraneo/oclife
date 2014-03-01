@@ -1,5 +1,4 @@
 $(document).ready(function(){
-
     // no versions actions in public mode
     // beware of https://github.com/owncloud/core/issues/4545
     // as enabling this might hang Chrome
@@ -84,13 +83,13 @@ $(document).ready(function(){
                                     if(!createNew) {
                                         $(e.relatedTarget).addClass('invalid');
                                     } else {
-
                                         $.ajax({
-                                            url: OC.filePath('oclife', 'ajax', 'createTag.php'),
+                                            url: OC.filePath('oclife', 'ajax', 'tagOps.php'),
                                             async: false,
                                             timeout: 2000,
 
                                             data: {
+                                                tagOp: 'new',
                                                 parentID: -1,
                                                 tagName: tagLabel,
                                                 tagLang: "xx"
@@ -99,9 +98,9 @@ $(document).ready(function(){
                                             type: "POST",
 
                                             success: function(result) {
-                                                var resArray = result.split("-");
-                                                if(resArray[0] === 'OK') {
-                                                    tagID = parseInt(resArray[1]);
+                                                var resArray = jQuery.parseJSON(result);
+                                                if(resArray.result === 'OK') {
+                                                    tagID = parseInt(resArray.key);
 
                                                     newTag = false;                                                    
                                                 } else {

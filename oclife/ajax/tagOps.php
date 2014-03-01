@@ -26,10 +26,26 @@ if($onlyAdminCanEdit) {
     OCP\User::checkLoggedIn();
 }
 
+// Check for a valid operation to perform
+$tagOp = filter_input(INPUT_POST, 'tagOp', FILTER_SANITIZE_STRING);
+$validOps = array('new', 'rename', 'delete');
+
+if(array_search($tagOp, $validOps) === FALSE) {
+    $result = array(
+        'result' => 'KO',
+        'title' => '',
+        'key' => '',
+        'class' => ''
+    );
+    
+    die(json_encode($result));
+}
+
+// Check for valid input parameters
 $parentID = intval(filter_input(INPUT_POST, 'parentID', FILTER_SANITIZE_NUMBER_INT));
+$tagID = filter_input(INPUT_POST, 'tagID', FILTER_SANITIZE_NUMBER_INT);
 $tagName = filter_input(INPUT_POST, 'tagName', FILTER_SANITIZE_STRING);
 $tagLang = filter_input(INPUT_POST, 'tagLang', FILTER_SANITIZE_STRING);
-
 if($parentID === FALSE || $tagName === FALSE || strlen($tagLang) === 0 || strlen($tagLang) > 2) {
     $result = array(
         'result' => 'KO',
@@ -37,26 +53,50 @@ if($parentID === FALSE || $tagName === FALSE || strlen($tagLang) === 0 || strlen
         'key' => '',
         'class' => ''
     );
-} else {
-    $ctags = new \OCA\OCLife\hTags();
+    
+    die(json_encode($result));
+}
 
-    $newTagID = $ctags->newTag($tagLang, $tagName, $parentID);
+// Switch between possible operations
+$ctags = new \OCA\OCLife\hTags();
 
-    if($newTagID === FALSE) {
-        $result = array(
-            'result' => 'KO',
-            'title' => '',
-            'key' => '',
-            'class' => ''
-        );
-    } else {
-        $result = array(
-            'result' => 'OK',
-            'title' => $tagName,
-            'key' => $newTagID,
-            'class' => 'global'
-        );
+switch($tagOp) {
+    case 'new': {
+        $result = $ctags->newTag($tagLang, $tagName, $parentID);
+        
+        break;
     }
+    
+    case 'rename': {
+        $tagData = array($tagLang => $tagName);
+        $ctags->alterTag($tagID, $tagData);
+        $result = $tagID;
+        
+        break;
+    }
+    
+    case 'delete': {
+        $result = $ctags->deleteTagAndChilds(intval($tagID));
+        
+        break;
+    }
+}
+
+// Publish the op result
+if($result === FALSE) {
+    $result = array(
+        'result' => 'KO',
+        'title' => '',
+        'key' => '',
+        'class' => ''
+    );
+} else {
+    $result = array(
+        'result' => 'OK',
+        'title' => $tagName,
+        'key' => $result,
+        'class' => 'global'
+    );
 }
 
 echo json_encode($result);

@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+\OCP\JSON::callCheck();
 // Check if app enabled and user logged in
-OCP\JSON::checkAppEnabled('oclife');
-OCP\User::checkLoggedIn();
+\OCP\JSON::checkAppEnabled('oclife');
+\OCP\User::checkLoggedIn();
 
 // Revert parameters from ajax
 $fileID = intval(filter_input(INPUT_POST, 'fileID', FILTER_SANITIZE_NUMBER_INT));

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+\OCP\JSON::callCheck();
 \OCP\JSON::checkLoggedIn();
 \OCP\JSON::checkAppEnabled('oclife');
 

@@ -17,9 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-OCP\JSON::checkAppEnabled('oclife');
-OCP\User::checkLoggedIn();
+\OCP\JSON::callCheck();
+\OCP\JSON::checkAppEnabled('oclife');
+\OCP\User::checkLoggedIn();
 
 $onlyAdminCanEdit = intval(OCP\Config::getAppValue('oclife', 'onlyAdminCanEdit'));
 

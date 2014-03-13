@@ -21,15 +21,18 @@
 \OCP\JSON::checkLoggedIn();
 \OCP\JSON::checkAppEnabled('oclife');
 
-$fileID = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_NUMBER_INT);
-$etag = filter_input(INPUT_POST, 'etag', FILTER_SANITIZE_STRING);
+$rawFilesData = filter_input(INPUT_POST, 'id', FILTER_SANITIZE_URL);
+$filesData = json_decode($rawFilesData);
 
-$result = array();
-
-$tagCodes = \OCA\OCLife\hTags::getAllTagsForFile($fileID);
+if(is_array($filesData)) {
+    $tagCodes = \OCA\OCLife\hTags::getCommonTagsForFiles($filesData);
+} else {
+    $tagCodes = \OCA\OCLife\hTags::getAllTagsForFile($filesData);
+}
 
 $tags = new \OCA\OCLife\hTags();
 
+$result = array();
 foreach($tagCodes as $tagID) {
     $tagData = $tags->searchTagFromID($tagID);
     $result[] = new \OCA\OCLife\tag($tagID, $tagData['xx']);

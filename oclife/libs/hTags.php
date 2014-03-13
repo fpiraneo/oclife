@@ -468,8 +468,8 @@ class hTags {
 
     /**
      * Add a tag for a file ID
-     * @param type $fileID File ID where to add the tag
-     * @param type $tagID ID of tag to be added
+     * @param integer $fileID File ID where to add the tag
+     * @param integer $tagID ID of tag to be added
      * @return boolean TRUE if success, FALSE otherwise
      */
     public static function addTagForFile($fileID, $tagID) {
@@ -492,27 +492,99 @@ class hTags {
         $sql = 'INSERT INTO *PREFIX*oclife_docTags (fileid, tagid) VALUES (?,?)';
         $args = array($fileID, $tagID);
         $query = \OCP\DB::prepare($sql);
-        $resRsrc = $query->execute($args);
+        $query->execute($args);
+        
+        return TRUE;
+    }
+    
+    /**
+     * Add a tag for a bunch of file IDs
+     * @param array $fileID File IDs where to add the tag
+     * @param integer $tagID ID of tag to be added
+     * @return boolean TRUE if success, FALSE otherwise
+     */
+    public static function addTagForFiles($fileIDs, $tagID) {
+        // Not an array - Exit
+        if(!is_array($fileIDs)) {
+            return FALSE;
+        }
+
+        // Do add
+        foreach($fileIDs as $fileID) {
+            hTags::addTagForFile($fileID, $tagID);
+        }
         
         return TRUE;
     }
     
     /**
      * Remove a tag for a file ID
-     * @param type $fileID
-     * @param type $tagID
-     * @return boolean Description
+     * @param integer $fileID ID of file to remove the tag
+     * @param integer $tagID Tag to be removed
+     * @return boolean TRUE if successfull
      */
     public static function removeTagForFile($fileID, $tagID) {
         // Proceed to add the tag
         $sql = 'DELETE FROM *PREFIX*oclife_docTags WHERE fileid=? AND tagid=?';
         $args = array($fileID, $tagID);
         $query = \OCP\DB::prepare($sql);
-        $resRsrc = $query->execute($args);
+        $query->execute($args);
         
         return TRUE;
     }
     
+    /**
+     * Remove a tag for a bunch of file ID
+     * @param array $fileIDs IDs of file to remove the tag
+     * @param integer $tagID Tag to be removed
+     * @return boolean TRUE if successfull
+     */    
+    public static function removeTagForFiles($fileIDs, $tagID) {
+        // Not an array - Exit
+        if(!is_array($fileIDs)) {
+            return FALSE;
+        }
+
+        // Do remove
+        foreach($fileIDs as $fileID) {
+            if(!hTags::removeTagForFile($fileID, $tagID)) {
+                return FALSE;
+            }
+        }
+        
+        return TRUE;
+    }
+    
+    /**
+     * Get all tags that are commons for a bunch of files
+     * @param array $fileIDs IDs of the files
+     * @return array Tags IDs commons to all the files
+     */
+    public static function getCommonTagsForFiles($fileIDs) {
+        // Not an array - Exit
+        if(!is_array($fileIDs)) {
+            return FALSE;
+        }
+        
+        $result = array();
+        $firstPass = TRUE;
+
+        foreach($fileIDs as $fileID) {
+            $tagsForFile = hTags::getAllTagsForFile($fileID);
+            
+            // If first pass assign tags to array, otherwise intersect
+            if($firstPass) {
+                $result = $tagsForFile;
+                $firstPass = FALSE;
+            } else {
+                $result = array_intersect($result, $tagsForFile);
+            }
+        }
+        
+        return $result;
+    }
+
+
     /**
      * Get all tags for a file ID
      * @param type $fileID

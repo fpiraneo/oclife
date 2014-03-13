@@ -25,6 +25,19 @@
 // Revert parameters from ajax
 $fileID = intval(filter_input(INPUT_POST, 'fileID', FILTER_SANITIZE_NUMBER_INT));
 
+// Check if multiple file has been choosen
+if($fileID === -1) {
+    $thumbPath = OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('fileid' => $fileID));
+    $preview = '<img style="border: 1px solid black; display: block;" src="' . $thumbPath . '" />';
+    
+    $infos = '<strong>Multiple files selected</strong>';
+
+    $result = array('preview' => $preview, 'infos' => $infos);
+
+    print json_encode($result);
+    die();
+}
+
 // Begin to collect files informations
 $filePath = \OC\Files\Filesystem::getPath($fileID);
 
@@ -67,20 +80,6 @@ foreach($infos as $row) {
     $htmlInfos .= $row . '<br />';
 }
 
-print <<<END1
-<table>
-<tr>
+$result = array('preview' => $preview, 'infos' => $htmlInfos);
 
-<td>
-$preview
-</td>
-
-<td style="vertical-align: top;">
-<div style="margin: 10px;">
-$htmlInfos
-</div>
-</td>
-
-</tr>
-</table>
-END1;
+print json_encode($result);

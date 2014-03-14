@@ -20,6 +20,9 @@
 
 OCP\User::checkAdminUser();
 
+// Handle translations
+$l = new \OC_L10N('oclife');
+
 OCP\Util::addscript('oclife', 'oclife/oclife_admin');
 
 $onlyAdminCanEdit = intval(OCP\Config::getAppValue('oclife', 'onlyAdminCanEdit'));
@@ -30,7 +33,7 @@ $tmpl->assign('onlyAdminCanEdit', ($onlyAdminCanEdit === 1) ? 'CHECKED' : '');
 $tmpl->assign('useImageMagick', ($useImageMagick === 1) ? 'CHECKED' : '');
 
 $imagick = extension_loaded('imagick');
-$imagickEnabled = $imagick ? "ImageMagick is loaded and ready to be used" : "ImageMagick is not loaded: Please refers to php manual.";
+$imagickEnabled = $imagick ? $l->t('ImageMagick is loaded and ready to be used') : $l->t('ImageMagick is not loaded: Please refers to php manual.');
 $tmpl->assign('imagickEnabled', $imagickEnabled);
 
 $tmpl->assign('enImageMagick', $imagick ? '' : 'disabled="DISABLED"');

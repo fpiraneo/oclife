@@ -22,6 +22,9 @@
 \OCP\JSON::checkAppEnabled('oclife');
 \OCP\User::checkLoggedIn();
 
+// Handle translations
+$l = new \OC_L10N('oclife');
+
 // Revert parameters from ajax
 $fileID = intval(filter_input(INPUT_POST, 'fileID', FILTER_SANITIZE_NUMBER_INT));
 
@@ -30,7 +33,7 @@ if($fileID === -1) {
     $thumbPath = OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('fileid' => $fileID));
     $preview = '<img style="border: 1px solid black; display: block;" src="' . $thumbPath . '" />';
     
-    $infos = '<strong>Multiple files selected</strong>';
+    $infos = '<strong>' . $l->t('Multiple files selected') . '</strong>';
 
     $result = array('preview' => $preview, 'infos' => $infos);
 
@@ -64,14 +67,14 @@ $thumbPath = OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('filei
 $preview = '<img style="border: 1px solid black; display: block;" src="' . $thumbPath . '" />';
 
 $infos = array();
-$infos[] = '<strong>File name: </strong>' . $fileInfos['name'];
+$infos[] = '<strong>' . $l->t('File name') . ': </strong>' . $fileInfos['name'];
 $infos[] = '<strong>MIME: </strong>' . $fileInfos['mimetype'];
-$infos[] = '<strong>Size: </strong>' . \OCA\OCLife\utilities::formatBytes($fileInfos['size'], 2, TRUE);
-$infos[] = '<strong>When added: </strong>' . \OCP\Util::formatDate($fileInfos['storage_mtime']);
-$infos[] = '<strong>Encrypted? </strong>' . (($fileInfos['encrypted'] === TRUE) ? 'Yes' : 'No');
+$infos[] = '<strong>' . $l->t('Size') . ': </strong>' . \OCA\OCLife\utilities::formatBytes($fileInfos['size'], 2, TRUE);
+$infos[] = '<strong>' . $l->t('When added') . ': </strong>' . \OCP\Util::formatDate($fileInfos['storage_mtime']);
+$infos[] = '<strong>' . $l->t('Encrypted? ') . '</strong>' . (($fileInfos['encrypted'] === TRUE) ? $l->t('Yes') : $l->t('No'));
 
 if($fileInfos['encrypted']) {
-    $infos[] = '<strong>Unencrypted size: </strong>' . \OCA\OCLife\utilities::formatBytes($fileInfos['unencrypted_size'], 2, TRUE);
+    $infos[] = '<strong>' . $l->t('Unencrypted size') . ': </strong>' . \OCA\OCLife\utilities::formatBytes($fileInfos['unencrypted_size'], 2, TRUE);
 }
 
 // Output the result!

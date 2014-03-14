@@ -17,7 +17,7 @@ $(document).ready(function(){
                     var tagIconPath = OC.imagePath('oclife','icon_tag');
                     var newAction = "<a class=\"donwload\" id=\"tagGroup\">";
                     newAction += "<img class=\"svg\" src=\"" + tagIconPath + "\" alt=\"Tag group of file\" style=\"width: 17px; height: 17px; margin: 0px 5px 0px 5px;\" />";
-                    newAction += "Tag group</a>";
+                    newAction += t('oclife', 'Tag selected files') + "</a>";
                     return newAction + oldhtml;
                 } else {
                     return oldhtml;
@@ -25,7 +25,7 @@ $(document).ready(function(){
             });
             
             var infoIconPath = OC.imagePath('oclife','icon_info');
-            FileActions.register('file', 'Informations', OC.PERMISSION_UPDATE, infoIconPath, function(fileName) {
+            FileActions.register('file', t('oclife', 'Informations'), OC.PERMISSION_UPDATE, infoIconPath, function(fileName) {
             // Action to perform when clicked
             if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
             var tr = $('tr').filterAttr('data-file', fileName);
@@ -45,13 +45,13 @@ $(document).ready(function(){
         },
 
         error: function (xhr, status) {
-            window.alert('Unable to Get user\'s priviledge.');
+            window.alert(t('oclife', 'Unable to Get user\'s priviledge.'));
         },
 
         type: "GET"});
 
     // This is the div where informations will appears
-    $('#content').append('<div id="oclife_infos" title="Informations">\n\
+    $('#content').append('<div id="oclife_infos" title="' + t('oclife', 'Informations') + '">\n\
         <div id="oclife_infoData">\n\
         <table>\n\
         <tr>\n\
@@ -61,13 +61,13 @@ $(document).ready(function(){
         </table>\n\
         </div>\n\
         <fieldset class="oclife_tagsbox" id="oclife_tags_container"><legend>Tags</legend>\n\
-        <input type="text" class="form-control" id="oclife_tags" placeholder="Enter tags here" min-width: 150px; />\n\
+        <input type="text" class="form-control" id="oclife_tags" placeholder="' + t('oclife', 'Enter tags here') + '" min-width: 150px; />\n\
         </fieldset>\n\
         </div>');
 
     // This is the div where tag group will happens
-    $('#content').append('<div id="oclife_tagGroup" title="Tag group of files">\n\
-        <fieldset class="oclife_tagsbox"><legend>File(s) where the tags will be applied</legend>\n\
+    $('#content').append('<div id="oclife_tagGroup" title="' + t('oclife', 'Tag selected files') + '">\n\
+        <fieldset class="oclife_tagsbox"><legend>' + t('oclife', 'File(s) where the tags will be applied') + '</legend>\n\
         <table style="margin: 5px;">\n\
         <tr>\n\
         <td id="oclife_multiPreview"></td>\n\
@@ -79,11 +79,11 @@ $(document).ready(function(){
         </tr>\n\
         </table>\n\
         </fieldset>\n\
-        <fieldset class="oclife_tagsbox" id="oclife_allfiles_tags_container"><legend>Tags common to all files</legend>\n\
-        <input type="text" class="form-control" id="oclife_allfiles_tags" placeholder="Enter tags here" min-width: 150px; />\n\
+        <fieldset class="oclife_tagsbox" id="oclife_allfiles_tags_container"><legend>' + t('oclife', 'Tags common to all files') + '</legend>\n\
+        <input type="text" class="form-control" id="oclife_allfiles_tags" placeholder="' + t('oclife', 'Enter tags here') + '" min-width: 150px; />\n\
         </fieldset>\n\
-        <fieldset class="oclife_tagsbox" id="oclife_selfiles_tags_container"><legend>Tags for the selected file</legend>\n\
-        <input type="text" class="form-control" id="oclife_selfiles_tags" placeholder="Enter tags here" min-width: 150px; />\n\
+        <fieldset class="oclife_tagsbox" id="oclife_selfiles_tags_container"><legend>' + t('oclife', 'Tags for the selected file') + '</legend>\n\
+        <input type="text" class="form-control" id="oclife_selfiles_tags" placeholder="' + t('oclife', 'Enter tags here') + '" min-width: 150px; />\n\
         </fieldset>\n\
         </div>');
     
@@ -149,7 +149,7 @@ function handleTagAdd(eventData, selFileID) {
         var createNew = false;
 
         if(canEditTag === 1) {
-            createNew = window.confirm('The tag "' + eventData.token.label + '" doesn\'t exist; would you like to create a new tag?');                                                        
+            createNew = window.confirm(t('oclife', 'The tag "') + eventData.token.label + t('oclife', '" doesn\'t exist; would you like to create a new one?'));                                                        
         }
 
         if(!createNew) {
@@ -176,12 +176,12 @@ function handleTagAdd(eventData, selFileID) {
 
                         newTag = false;                                                    
                     } else {
-                        window.alert('Unable to create the tag! Ajax error.');
+                        window.alert(t('oclife', 'Unable to create the tag! Ajax error.'));
                     }
                 },
 
                 error: function(xhr, status) {
-                    window.alert('Unable to create the tag! Ajax error.');
+                    window.alert(t('oclife', 'Unable to create the tag! Ajax error.'));
                     $(eventData.relatedTarget).addClass('invalid');
                 }
             });
@@ -203,7 +203,7 @@ function handleTagAdd(eventData, selFileID) {
             },
 
             error: function (xhr, status) {
-                window.alert('Unable to add the tag! Ajax error.');
+                window.alert(t('oclife', 'Unable to add the tag! Ajax error.'));
                 $(eventData.relatedTarget).addClass('invalid');
             },
 
@@ -225,12 +225,12 @@ function handleTagRemove(eventData, selFileID) {
 
         success: function(result) {
             if(result === "0") {
-                window.alert('Unable to remove the tag! Data base error.');
+                window.alert(t('oclife', 'Unable to remove the tag! Data base error.'));
             }
         },
 
         error: function (xhr, status) {
-            window.alert('Unable to remove the tag! Ajax error.');
+            window.alert(t('oclife', 'Unable to remove the tag! Ajax error.'));
         },
 
         type: "POST"});
@@ -274,7 +274,7 @@ function showFileInfo(fileID, fileName) {
                             },
 
                             error: function (xhr, status) {
-                                window.alert("Unable to get tags! Ajax error!");
+                                window.alert(t('oclife', 'Unable to get the tags! Ajax error.'));
                             }
                         })
                     },
@@ -289,11 +289,11 @@ function showFileInfo(fileID, fileName) {
         },
 
         error: function( xhr, status ) {
-            infoContent = "Unable to retrieve informations on this file! Ajax error!"
-        }                            
+            infoContent = t('oclife', 'Unable to retrieve informations on this file! Ajax error!');
+        }
     });                                
 
-    var dialogTitle = "Informations on \"" + fileName + "\"";
+    var dialogTitle =  t('oclife', 'Informations on') + ' "' + fileName + '"';
     $('#oclife_infos').dialog( "option", "title", dialogTitle );
 
     $.ajax({
@@ -310,7 +310,7 @@ function showFileInfo(fileID, fileName) {
         },
 
         error: function (xhr, status) {
-            window.alert('Unable to get actual tags for this document!')
+            window.alert(t('oclife', 'Unable to get actual tags for this document! Ajax error!'));
         },
 
         type: "POST"});
@@ -337,7 +337,7 @@ function showFileGroupInfo(files) {
 
     // Populate the select
     $('#oclife_filesGroup').html('');
-    $('#oclife_filesGroup').append('<option value="-1" selected>All selected files</option>');
+    $('#oclife_filesGroup').append('<option value="-1" selected>' + t('oclife', 'All selected files') + '</option>');
     for(var iterator = 0; iterator < files.length; iterator++) {
         $('#oclife_filesGroup').append('<option value="' + files[iterator].id + '">' + files[iterator].name + '</option>');
     }
@@ -375,7 +375,7 @@ function populateFileInfo(selFileID) {
                         },
 
                         error: function (xhr, status) {
-                            window.alert("Unable to get tags! Ajax error!");
+                            window.alert(p('oclife', 'Unable to get the tags! Ajax error.'));
                         }
                     })
                 },
@@ -426,7 +426,7 @@ function populateFileInfo(selFileID) {
             },
 
             error: function (xhr, status) {
-                window.alert('Unable to get actual tags for this document!')
+                window.alert(p('oclife', 'Unable to get actual tags for this document! Ajax error!'));
             },
 
             type: "POST"});

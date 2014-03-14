@@ -19,12 +19,12 @@ $(function() {
 
                 success: function( result ) {
                     if(result !== 'OK') {
-                        window.alert("Settings not saved! Data base error!")
+                        window.alert(t('oclife', 'Settings not saved! Data base error!'))
                     }
                 },
 
                 error: function( xhr, status ) {
-                    window.alert("Settings not saved! Communication error!")
+                    window.alert(t('Settings not saved! Communication error!'))
                 }                            
             });
         });

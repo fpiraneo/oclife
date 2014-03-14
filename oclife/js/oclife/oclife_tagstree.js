@@ -13,7 +13,7 @@ $(document).ready(
                 },
 
                 error: function (xhr, status) {
-                    updateStatusBar('Unable to Get user\'s priviledge.');
+                    updateStatusBar(t('oclife', 'Unable to get user\'s priviledge.'));
                 },
 
                 type: "GET"});            
@@ -111,7 +111,7 @@ $(function(){
                     },
                     
                     error: function( xhr, status ) {
-                        updateStatusBar("Unable to get files list!");
+                        updateStatusBar(t('oclife', 'Unable to get files list!'));
                     }
                 });                      
                 
@@ -142,13 +142,13 @@ $(function(){
                             
                             success: function( result ) {
                                 if(result === 'OK') {
-                                    updateStatusBar("Tag moved successfully!");
+                                    updateStatusBar(t('oclife', 'Tag moved successfully!'));
                                 } else {
-                                    updateStatusBar("Tag not moved! DB error!");
+                                    updateStatusBar(t('oclife', 'Tag not moved! Data base error!'));
                                 }
                             },
                             error: function( xhr, status ) {
-                                    updateStatusBar("Tag not moved! Ajax error!");
+                                    updateStatusBar(t('oclife', 'Tag not moved! Ajax error!'));
                             }
                         });                      
                       
@@ -158,11 +158,13 @@ $(function(){
             contextMenu: {
                     menu: function () {
                         if(canEditTag === 1) {
-                            return {'edit' : { 'name': 'Rename', 'icon': 'edit' },
-                            'new': { 'name': 'New', 'icon': 'add' },
-                            'delete': { 'name': 'Delete', 'icon': 'delete'}};
+                            return {
+                                'edit' : { 'name': t('oclife', 'Rename'), 'icon': 'edit' },
+                                'new': { 'name': t('oclife', 'New'), 'icon': 'add' },
+                                'delete': { 'name': t('oclife', 'Delete'), 'icon': 'delete'}
+                            };
                         } else {
-                            return {'nothing' : {'name': 'Nothing possible', 'icon':'delete', disabled: true}};
+                            return {'nothing' : {'name': t('oclife', 'Nothing possible'), 'icon':'delete', disabled: true}};
                         }
                     },
                     
@@ -171,8 +173,8 @@ $(function(){
                             case 'edit': {
                                 var node = $("#tagstree").fancytree("getActiveNode");
                                 
-                                if(node.key == -1) {
-                                    updateStatusBar("Editing of Root node not allowed!");
+                                if(node.key === '-1') {
+                                    updateStatusBar(t('oclife', 'Editing of Root node not allowed!'));
                                     break;
                                 }
 
@@ -180,6 +182,7 @@ $(function(){
                                 $("#tagID").val(node.key);
 
                                 $( "#renameTag" ).dialog( "open" );
+                                $(this).closest('.ui-dialog').find('.ui-dialog-buttonpane button:eq(0)').focus();
                                 break;
                             }
 
@@ -190,20 +193,22 @@ $(function(){
                                 parentID.value = node.key;
 
                                 $( "#createTag" ).dialog( "open" );
+                                $(this).closest('.ui-dialog').find('.ui-dialog-buttonpane button:eq(0)').focus();
                                 break;
                             }
 
                             case 'delete': {
                                 var node = $("#tagstree").fancytree("getActiveNode");
 
-                                if(node.key == -1) {
-                                    updateStatusBar("Deleting of Root node not allowed!");
+                                if(node.key === '-1') {
+                                    updateStatusBar(t('oclife', 'Deleting of Root node not allowed!'));
                                     break;
                                 }
                                 $("#tagToDelete").text(node.title);
                                 deleteID.value = node.key;
 
                                 $( "#deleteConfirm" ).dialog( "open" );
+                                $(this).closest('.ui-dialog').find('.ui-dialog-buttonpane button:eq(0)').focus();
                                 break;
                             }
                         }
@@ -215,7 +220,7 @@ $(function(){
 
         function checkLength( o, min, max ) {
             if ( o.value.length > max || o.value.length < min ) {
-                    updateTips( "Lenght must be between " + min + " - " + max + "." );
+                    updateTips('Lenght must be between ' + min + " - " + max + "." );
                     return false;
                 } else {
                     return true;
@@ -247,12 +252,15 @@ $(function(){
             modal: true,
             resizable: false,
             buttons: {
-                "Confirm": function() {
-                    renameTag();
+                Confirm: {
+                    text: t('oclife', 'Confirm'),
+                    click: function() {
+                        renameTag();
+                    }
                 },
             
                 Cancel: {
-                    text: "Annulla",
+                    text: t('oclife', 'Cancel'),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -310,14 +318,14 @@ $(function(){
                             var newNode = parentNode.addChildren(nodeData);
                             newNode.setActive(true);
 
-                            updateStatusBar("Rename done!");
+                            updateStatusBar(t('oclife', 'Rename done!'));
                         } else {
-                            updateStatusBar("Unable to rename! DB error!");
+                            updateStatusBar(t('oclife', 'Unable to rename! Data base error!'));
                         }
                     },
 
                     error: function( xhr, status ) {
-                        updateStatusBar("Unable to rename! Ajax error!");
+                        updateStatusBar(t('oclife', 'Unable to rename! Ajax error!'));
                     }                            
                 });                        
 
@@ -332,12 +340,15 @@ $(function(){
             modal: true,
             resizable: false,
             buttons: {
-                "Confirm": function() {
-                    insertTag()
+                Confirm: {
+                    text: t('oclife', 'Confirm'),
+                    click: function() {
+                        insertTag();
+                    }
                 },
             
                 Cancel: {
-                    text: "Cancel",
+                    text: t('oclife', 'Cancel'),
                     click: function() {
                         $( this ).dialog( "close" );
                     }
@@ -394,14 +405,14 @@ $(function(){
                             node.setExpanded(true);
                             newNode.setActive(true);
 
-                            updateStatusBar("Tag created successfully!");
+                            updateStatusBar(t('oclife', 'Tag created successfully!'));
                         } else {
-                            updateStatusBar("Unable to create! DB error!");
+                            updateStatusBar(t('oclife', 'Unable to create tag! Data base error!'));
                         }
                     },
 
                     error: function( xhr, status ) {
-                        updateStatusBar("Unable to create! Ajax error!");
+                        updateStatusBar(t('oclife', 'Unable to create tag! Ajax error!'));
                     }                            
                 });                        
 
@@ -416,51 +427,57 @@ $(function(){
             height: 200,
             modal: true,
             buttons: {
-                "Annulla": function() {
-                    $( this ).dialog( "close" );
-                    updateStatusBar("Operation canceled: No deletion occurred!");
+                Cancel: {
+                    text: t('oclife', 'Cancel'),
+                    click: function() {
+                        $( this ).dialog( "close" );
+                        updateStatusBar(t('oclife', 'Operation canceled: No deletion occurred!'));
+                    }
                 },
                 
-                "Cancella": function() {
-                    $( this ).dialog( "close" );
-                    
-                    var tagID = deleteID.value;
-                    
-                    if(tagID === "-1") {
-                        updateStatusBar("Invalid tag number! Nothing done!");
-                        return;
-                    }
-                    
-                    $.ajax({
-                        url: OC.filePath('oclife', 'ajax', 'tagOps.php'),
-                        async: false,
-                        timeout: 2000,
+                Delete: {
+                    text: t('oclife', 'Delete'),
+                    click: function() {
+                        $( this ).dialog( "close" );
 
-                        data: {
-                            tagOp: 'delete',
-                            parentID: '-1',
-                            tagName: '',
-                            tagLang: "xx",                            
-                            tagID: tagID
-                        },
+                        var tagID = deleteID.value;
 
-                        type: "POST",
-
-                        success: function(result) {
-                            var resArray = jQuery.parseJSON(result);
-                            
-                            if(resArray.result === 'OK') {
-                                $("#tagstree").fancytree("getActiveNode").remove();
-                                updateStatusBar("Tags removed successfully!");
-                            } else {
-                                updateStatusBar("Tags not removed! DB error!");
-                            }
-                        },
-                        error: function( xhr, status ) {
-                                updateStatusBar("Tags not removed! Ajax error!");
+                        if(tagID === "-1") {
+                            updateStatusBar(t('oclife', 'Invalid tag number! Nothing done!'));
+                            return;
                         }
-                    });                    
-                }                
+
+                        $.ajax({
+                            url: OC.filePath('oclife', 'ajax', 'tagOps.php'),
+                            async: false,
+                            timeout: 2000,
+
+                            data: {
+                                tagOp: 'delete',
+                                parentID: '-1',
+                                tagName: '',
+                                tagLang: "xx",
+                                tagID: tagID
+                            },
+
+                            type: "POST",
+
+                            success: function(result) {
+                                var resArray = jQuery.parseJSON(result);
+
+                                if(resArray.result === 'OK') {
+                                    $("#tagstree").fancytree("getActiveNode").remove();
+                                    updateStatusBar(t('oclife', 'Tag removed successfully!'));
+                                } else {
+                                    updateStatusBar(t('oclife', 'Tag not removed! Data base error!'));
+                                }
+                            },
+                            error: function( xhr, status ) {
+                                    updateStatusBar(t('oclife', 'Tags not removed! Ajax error!'));
+                            }
+                        });                    
+                    }
+                }
             }
         });
 
@@ -473,7 +490,7 @@ $(function(){
         buttons: {
             "Close": function() {
                 $( this ).dialog( "close" );
-            }           
+            }
         }
-    });            
+    });
 });

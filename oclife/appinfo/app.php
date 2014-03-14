@@ -39,6 +39,9 @@
     'name' => 'Tags'
 ));
 
+// Handle translations
+$l = new \OC_L10N('oclife');
+
 // Add what's needed by TagManager
 \OCP\Util::addStyle('oclife', 'bootstrap-tokenfield');
 \OCP\Util::addStyle('oclife', 'pygments-manni');

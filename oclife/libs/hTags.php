@@ -1,30 +1,30 @@
 <?php
 /*
  * Copyright 2014 by Francesco PIRANEO G. (fpiraneo@gmail.com)
- * 
+ *
  * This file is part of oclife.
- * 
+ *
  * oclife is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * oclife is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
  * Handle hierarchical structure of tags; in DB the structure of tag will be:
- * 
+ *
  * @author fpiraneo
  */
 namespace OCA\OCLife;
-class hTags {        
+class hTags {
     /**
      * Returns the tag ID of an existing tag
      * @param type $tagLang language code (EN, IT, FR, ...)
@@ -32,20 +32,20 @@ class hTags {
      */
     public function searchTag($tagLang, $tagDescr) {
         $result = array();
-        
+
         // *PREFIX* is being replaced with the ownCloud installation prefix
         $sql = "SELECT tagid FROM *PREFIX*oclife_humanReadable WHERE lang=? AND descr=?";
         $args = array($tagLang, $tagDescr);
-        
+
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
         while($row = $resRsrc->fetchRow()) {
             $result[] = $row;
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Search a tag from it's ID
      * @param integer $tagID
@@ -53,17 +53,17 @@ class hTags {
      */
     public function searchTagFromID($tagID) {
         $result = array();
-        
+
         // *PREFIX* is being replaced with the ownCloud installation prefix
         $sql = "SELECT lang, descr FROM *PREFIX*oclife_humanReadable WHERE tagid=?";
         $args = array($tagID);
-        
+
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
         while($row = $resRsrc->fetchRow()) {
             $result[$row['lang']] = $row['descr'];
         }
-        
+
         return $result;
     }
 
@@ -84,32 +84,26 @@ class hTags {
         if(count($this->searchTag($tagLang, $tagDescr)) != 0) {
             return FALSE;
         }
-        
+
         // Proceed with creation
         $result = array();
-        
+
         // Insert master record
         $sql = "INSERT INTO *PREFIX*oclife_tags (parent) VALUES (?)";
         $args = array($parentID);
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
-        
+
         // Get inserted index
-        $sql = "SELECT LAST_INSERT_ID() AS lastid";
-        $query = \OCP\DB::prepare($sql);
-        $resRsrc = $query->execute();
-        
-        while($row = $resRsrc->fetchRow()) {
-            $newIndex = $row['lastid'];
-        }
-        
+        $newIndex = \OCP\DB::insertid();
+
         // Insert human readable
         $args = array($newIndex, strtolower($tagLang), trim($tagDescr));
         $sql = "INSERT INTO *PREFIX*oclife_humanReadable (tagid, lang, descr) VALUES (?,?,?)";
         $query = \OCP\DB::prepare($sql);
-        $resRsrc = $query->execute($args);        
-        
-        return $newIndex;        
+        $resRsrc = $query->execute($args);
+
+        return $newIndex;
     }
 
     /**
@@ -129,27 +123,27 @@ class hTags {
             if(strlen(trim($tagLang)) != 2) {
                 continue;
             }
-            
+
             $tagLangToInsert = trim(strtolower($tagLang));
             $tagDescrToInsert = trim($tagDescr);
-            
+
             // Check if we have to delete some data
             if($tagDescr === '') {
                 $sql = 'DELETE FROM *PREFIX*oclife_humanReadable WHERE tagid=? AND lang=?';
                 $args = array($tagId, $tagLangToInsert);
-                
+
                 $query = \OCP\DB::prepare($sql);
                 $resRsrc = $query->execute($args);
             } else {
                 // We have to insert or modify
                 $sql = 'SELECT descr FROM *PREFIX*oclife_humanReadable WHERE tagid=? AND lang=?';
                 $args = array($tagId, $tagLangToInsert);
-                
+
                 $query = \OCP\DB::prepare($sql);
                 $resRsrc = $query->execute($args);
-                
+
                 $dataRow = $resRsrc->fetchRow();
-                
+
                 if(isset($dataRow['descr'])) {
                     // Perform an update
                     $sql = 'UPDATE *PREFIX*oclife_humanReadable SET descr=? WHERE tagid=? and lang=?';
@@ -165,30 +159,30 @@ class hTags {
                 }
             }
         }
-        
+
         return true;
     }
-    
+
     /**
      * Returns an array of all existing tags with given language
      * @param string $tagLang Language of the description to be returned
      */
     public function getAllTags($tagLang) {
         $result = array();
-        
+
         // *PREFIX* is being replaced with the ownCloud installation prefix
         $sql = "SELECT * FROM *PREFIX*oclife_humanReadable WHERE lang=? ORDER BY tagid";
         $args = array($tagLang);
-        
+
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
         while($row = $resRsrc->fetchRow()) {
             $result[] = $row;
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Returns tags starting with given string
      * @param string $tagLang
@@ -197,20 +191,20 @@ class hTags {
      */
     public function getTag($tagLang, $startTag) {
         $result = array();
-        
+
         // *PREFIX* is being replaced with the ownCloud installation prefix
         $sql = "SELECT * FROM *PREFIX*oclife_humanReadable WHERE lang=? and descr LIKE ?%";
         $args = array($tagLang, $startTag);
-        
+
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
         while($row = $resRsrc->fetchRow()) {
             $result[] = $row;
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Return a tree array with all the tags starting from $startTag
      * @param String $tagLang Tag language of $startTag
@@ -220,17 +214,17 @@ class hTags {
         if($tagLang == '') {
             return -1;
         }
-        
+
         // Get all tags with no parent
         $sql = 'SELECT id FROM *PREFIX*oclife_tags WHERE parent=-1 ORDER BY id';
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute();
-        
+
         $ids = array();
         while($row = $resRsrc->fetchRow()) {
             $ids[] = intval($row['id']);
         }
-        
+
         $result = array(
             0 => array(
                 'key' => '-1',
@@ -240,14 +234,14 @@ class hTags {
                 'children' => array()
                 )
             );
-        
+
         foreach($ids as $id) {
             $result[0]['children'][] = $this->getTagTreeFromID($id, $tagLang);
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Get the tag tree starting from tag with given ID
      * @param integer $ID Tag ID where to start the tree
@@ -260,40 +254,40 @@ class hTags {
             return -1;
         }
 
-        // Retrieve tag data        
+        // Retrieve tag data
         $sql = 'SELECT * FROM *PREFIX*oclife_humanReadable WHERE tagid=? AND lang=?';
         $args = array($ID, $lang);
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
-        
+
         while($row = $resRsrc->fetchRow()) {
             $result['key'] = $row['tagid'];
             $result['title'] = $row['descr'];
             $result['class'] = 'global';
         }
-        
+
         $result['children'] = array();
-        
+
         // Fetch all childs ids if any
         $childsIDs = array();
         $sql = 'SELECT id FROM *PREFIX*oclife_tags WHERE parent=?';
         $args = array($ID);
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
-        
+
         while($row = $resRsrc->fetchRow()) {
             $childsIDs[] = $row['id'];
         }
-        
+
         // Fetch all childs data
         $childsData = array();
-        
+
         foreach($childsIDs as $id) {
             $childsData[] = $this->getTagTreeFromID(intval($id), $lang);
         }
-        
+
         $result['children'] = $childsData;
-        
+
         return $result;
     }
 
@@ -310,38 +304,38 @@ class hTags {
             $args = array($lang, $parent);
             $query = \OCP\DB::prepare($sql);
             $resRsrc = $query->execute($args);
-            
+
             $parentData = array();
-            
+
             while($row = $resRsrc->fetchRow()) {
                 $parentData[] = $row;
             }
-            
+
             if(count($parentData) != 1) {
                 throw new Exception("Bad or no parent data found - $parent");
             }
         }
-        
+
         // Verify for right child
         if($tag !== '') {
             $sql = 'SELECT tagid FROM *PREFIX*oclife_humanReadable WHERE lang=? AND descr=?';
             $args = array($lang, $tag);
             $query = \OCP\DB::prepare($sql);
             $resRsrc = $query->execute($args);
-            
+
             $tagData = array();
-            
+
             while($row = $resRsrc->fetchRow()) {
                 $tagData[] = $row;
             }
-            
+
             if(count($tagData) != 1) {
                 throw new Exception("Bad or no child data found - $tag");
             }
         }
-        
+
         $this->setTagParentByID($tagData[0]['tagid'], $parentData[0]['tagid']);
-        return TRUE;                
+        return TRUE;
     }
 
     /**
@@ -356,7 +350,7 @@ class hTags {
         $query = \OCP\DB::prepare($sql);
         $query->execute($args);
     }
-    
+
     /**
      * Get all IDs of the child of given tag
      * @param array $parentID
@@ -367,27 +361,27 @@ class hTags {
         if($parentID === NULL || !is_int($parentID)) {
             return -1;
         }
-        
+
         $result = array();
-        
+
         // Fetch all childs ids if any
         $sql = 'SELECT id FROM *PREFIX*oclife_tags WHERE parent=?';
         $args = array($parentID);
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
-        
+
         while($row = $resRsrc->fetchRow()) {
             $result[] = $row['id'];
         }
-        
+
         // Fetch all childs id
         foreach($result as $id) {
             $result[] = $this->getAllChildIDHierarchical(intval($id));
         }
-                
+
         return $result;
     }
-    
+
     /**
      * Get all IDs of the child of given tag
      * @param array $parentID
@@ -396,7 +390,7 @@ class hTags {
     public function getAllChildID($parentID) {
         // Get all IDs in hierarchical format
         $hResult = $this->getAllChildIDHierarchical($parentID);
-        
+
         if(is_array($hResult)) {
             // Flatten the results
             $objTmp = (object) array('aFlat' => array());
@@ -413,10 +407,10 @@ class hTags {
         } else {
             $result = -1;
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Delete a tag and all it's childs
      * @param integer $tagID Tag to be deleted
@@ -427,17 +421,17 @@ class hTags {
         if(!is_int($tagID)) {
             return FALSE;
         }
-        
+
         // Get all id of childs
         $tagsToDelete = $this->getAllChildID($tagID);
-        
+
         // Delete all tags
         $this->deleteTags($tagsToDelete);
-        
+
         // Return an array of deleted tags
         return $tagsToDelete;
     }
-    
+
     /**
      * Delete all tags with IDs on array
      * @param array $tagsToDelete Tags ID to delete
@@ -447,7 +441,7 @@ class hTags {
         if(!is_array($tagsToDelete)) {
             return FALSE;
         }
-        
+
         // Execute deletion
         foreach ($tagsToDelete as $id) {
             // Delete from tags
@@ -462,7 +456,7 @@ class hTags {
             $query = \OCP\DB::prepare($sql);
             $query->execute($args);
         }
-        
+
         return TRUE;
     }
 
@@ -479,24 +473,24 @@ class hTags {
         $args = array($fileID, $tagID);
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
-        
+
         while($row = $resRsrc->fetchRow()) {
             $result[] = $row['id'];
         }
-        
+
         if(count($result) != 0) {
             return FALSE;
         }
-    
+
         // Proceed to add the tag
         $sql = 'INSERT INTO *PREFIX*oclife_docTags (fileid, tagid) VALUES (?,?)';
         $args = array($fileID, $tagID);
         $query = \OCP\DB::prepare($sql);
         $query->execute($args);
-        
+
         return TRUE;
     }
-    
+
     /**
      * Add a tag for a bunch of file IDs
      * @param array $fileID File IDs where to add the tag
@@ -513,10 +507,10 @@ class hTags {
         foreach($fileIDs as $fileID) {
             hTags::addTagForFile($fileID, $tagID);
         }
-        
+
         return TRUE;
     }
-    
+
     /**
      * Remove a tag for a file ID
      * @param integer $fileID ID of file to remove the tag
@@ -529,16 +523,16 @@ class hTags {
         $args = array($fileID, $tagID);
         $query = \OCP\DB::prepare($sql);
         $query->execute($args);
-        
+
         return TRUE;
     }
-    
+
     /**
      * Remove a tag for a bunch of file ID
      * @param array $fileIDs IDs of file to remove the tag
      * @param integer $tagID Tag to be removed
      * @return boolean TRUE if successfull
-     */    
+     */
     public static function removeTagForFiles($fileIDs, $tagID) {
         // Not an array - Exit
         if(!is_array($fileIDs)) {
@@ -551,10 +545,10 @@ class hTags {
                 return FALSE;
             }
         }
-        
+
         return TRUE;
     }
-    
+
     /**
      * Get all tags that are commons for a bunch of files
      * @param array $fileIDs IDs of the files
@@ -565,13 +559,13 @@ class hTags {
         if(!is_array($fileIDs)) {
             return FALSE;
         }
-        
+
         $result = array();
         $firstPass = TRUE;
 
         foreach($fileIDs as $fileID) {
             $tagsForFile = hTags::getAllTagsForFile($fileID);
-            
+
             // If first pass assign tags to array, otherwise intersect
             if($firstPass) {
                 $result = $tagsForFile;
@@ -580,7 +574,7 @@ class hTags {
                 $result = array_intersect($result, $tagsForFile);
             }
         }
-        
+
         return $result;
     }
 
@@ -596,14 +590,14 @@ class hTags {
         $args = array($fileID);
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
-        
+
         while($row = $resRsrc->fetchRow()) {
             $result[] = $row['tagid'];
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Used to remove all tags for a file
      * @param type $fileID
@@ -614,10 +608,10 @@ class hTags {
         $args = array($fileID);
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
-        
-        return TRUE;        
+
+        return TRUE;
     }
-    
+
     /**
      * Get the files with the indicated tag
      * @param integer $tagID Tag to look at
@@ -629,14 +623,14 @@ class hTags {
         $args = array($tagID);
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
-        
+
         while($row = $resRsrc->fetchRow()) {
             $result[] = intval($row['fileid']);
         }
-        
+
         return $result;
     }
-    
+
     /**
      * Array containing all the tags to be looked for
      * @param array $tagArray Tag to look at - Tags will be OR'ed
@@ -646,15 +640,15 @@ class hTags {
         if(!is_array($tagArray)) {
             return -1;
         }
-        
+
         $filesID = array();
         foreach($tagArray as $tag) {
             $partFilesID = hTags::getFileWithTag($tag);
             $filesID = array_merge($filesID, $partFilesID);
         }
-        
+
         $uniquesID = array_unique($filesID);
-        
+
         return $uniquesID;
     }
 }

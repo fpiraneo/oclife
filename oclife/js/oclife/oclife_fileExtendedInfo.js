@@ -1,3 +1,6 @@
+//TODO
+// - Non recupera le tag di gruppo
+
 // Check if we can create / edit tags
 var canEditTag = 0;
 
@@ -26,12 +29,10 @@ $(document).ready(function(){
             
             var infoIconPath = OC.imagePath('oclife','icon_info');
             FileActions.register('file', t('oclife', 'Informations'), OC.PERMISSION_UPDATE, infoIconPath, function(fileName) {
-            // Action to perform when clicked
-            if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
-            var tr = $('tr').filterAttr('data-file', fileName);
-            var fileID = $(tr).data('id');
-            
-            showFileInfo(fileID, fileName);
+                // Action to perform when clicked
+                if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
+
+                showFileInfo(fileName);
         });
     }
 
@@ -92,16 +93,16 @@ $(document).ready(function(){
         var files = getSelectedFiles();
         
         if(files.length === 1) {
-            showFileInfo(files[0].id, files[0].name);
+            showFileInfo(files[0].name);
         } else {
             showFileGroupInfo(files);
         }        
     });
 
     $( "#oclife_filesGroup" ).on("change", function() {
-        var selFileID = $("#oclife_filesGroup").val();
-        
-        if(selFileID === '-1') {
+        var selFilePath = $("#oclife_filesGroup").val();
+
+        if(selFilePath.substr(selFilePath.length - 1) === '/') {
             $("#oclife_allfiles_tags").tokenfield('enable');
             $("#oclife_selfiles_tags").tokenfield('disable');
         } else {
@@ -109,7 +110,7 @@ $(document).ready(function(){
             $("#oclife_selfiles_tags").tokenfield('enable');
         }
         
-        populateFileInfo(selFileID);
+        populateFileInfo(selFilePath);
     });
 
     $("#oclife_infos").dialog({
@@ -186,11 +187,9 @@ function handleTagAdd(eventData, selFileID) {
                 }
             });
         }
-    }
-
+    } 
+    
     if(!newTag) {
-        var fileID = (selFileID === '-1') ? getSelectedFiles('id') : selFileID;
-
         $.ajax({
             url: OC.filePath('oclife', 'ajax', 'tagsUpdate.php'),
             async: false,
@@ -198,7 +197,7 @@ function handleTagAdd(eventData, selFileID) {
 
             data: {
                 op: 'add',
-                fileID: JSON.stringify(fileID),
+                fileID: JSON.stringify(selFileID),
                 tagID: tagID
             },
 
@@ -236,9 +235,12 @@ function handleTagRemove(eventData, selFileID) {
         type: "POST"});
 }
 
-function showFileInfo(fileID, fileName) {
+function showFileInfo(fileName) {
     var infoPreview = "";
     var infoContent = "";
+    var fileID = -1;
+    var directory = $('#dir').val();
+    directory = (directory === "/") ? directory : directory + "/";
 
     $.ajax({
         url: OC.filePath('oclife', 'ajax', 'getFileInfo.php'),
@@ -246,7 +248,7 @@ function showFileInfo(fileID, fileName) {
         timeout: 2000,
 
         data: {
-            fileID: fileID,
+            filePath: directory + fileName
         },
 
         type: "POST",
@@ -256,6 +258,7 @@ function showFileInfo(fileID, fileName) {
 
             infoPreview = jsonResult.preview;
             infoContent = jsonResult.infos;
+            fileID = jsonResult.fileid;
             
             // Prepare token fields
             $('#oclife_tags').tokenfield({
@@ -302,7 +305,7 @@ function showFileInfo(fileID, fileName) {
         timeout: 2000,
 
         data: {
-            id: JSON.stringify(fileID)
+            id: fileID
         },
 
         success: function(result) {
@@ -333,17 +336,18 @@ function showFileInfo(fileID, fileName) {
 
 function showFileGroupInfo(files) {
     var filesList = JSON.stringify(files);
-    var dir = $('#dir').val() || '/';
+    var directory = $('#dir').val();
+    directory = (directory === "/") ? directory : directory + "/";
 
     // Populate the select
     $('#oclife_filesGroup').html('');
-    $('#oclife_filesGroup').append('<option value="-1" selected>' + t('oclife', 'All selected files') + '</option>');
+    $('#oclife_filesGroup').append('<option value="' + directory + '" selected>' + t('oclife', 'All selected files') + '</option>');
     for(var iterator = 0; iterator < files.length; iterator++) {
-        $('#oclife_filesGroup').append('<option value="' + files[iterator].id + '">' + files[iterator].name + '</option>');
+        $('#oclife_filesGroup').append('<option value="' + directory + files[iterator].name + '">' + files[iterator].name + '</option>');
     }
 
     // Get multiple files attribute
-    populateFileInfo('-1');
+    populateFileInfo(directory);
 
     // Opens the popup
     $("#oclife_allfiles_tags").tokenfield('enable');
@@ -351,9 +355,9 @@ function showFileGroupInfo(files) {
     $('#oclife_tagGroup').dialog("open");
 }
 
-function populateFileInfo(selFileID) {
+function populateFileInfo(filePath) {
         // Get file infos
-        var fileInfos = getFileInfo(selFileID);
+        var fileInfos = getFileInfo(filePath);
         
         $('#oclife_multiPreview').html(fileInfos.preview);
         $('#oclife_multInfosData').html(fileInfos.infos);
@@ -396,7 +400,7 @@ function populateFileInfo(selFileID) {
         });
 
         // Query to populate the tags
-        var fileID = (selFileID === '-1') ? getSelectedFiles('id') : selFileID;
+        var fileID = (fileInfos.fileID === -1) ? getSelectedFiles('id') : parseInt(fileInfos.fileID);
 
         // Remove old event handler
         $('#oclife_selfiles_tags').off('afterCreateToken');
@@ -418,7 +422,7 @@ function populateFileInfo(selFileID) {
                 $('#oclife_allfiles_tags').tokenfield('setTokens', []);
                 $('#oclife_selfiles_tags').tokenfield('setTokens', []);
                 
-                if(selFileID === '-1') {
+                if(fileID instanceof Array) {
                     $('#oclife_allfiles_tags').tokenfield('setTokens', JSON.parse(result));
                 } else {
                     $('#oclife_selfiles_tags').tokenfield('setTokens', JSON.parse(result));
@@ -453,7 +457,7 @@ function populateFileInfo(selFileID) {
         );
 }
 
-function getFileInfo(fileID) {
+function getFileInfo(filePath) {
     var result = new Object();
     
     $.ajax({
@@ -462,7 +466,7 @@ function getFileInfo(fileID) {
         timeout: 2000,
 
         data: {
-            fileID: fileID,
+            filePath: filePath
         },
 
         type: "POST",
@@ -473,13 +477,14 @@ function getFileInfo(fileID) {
             result.result = "OK";
             result.preview = jsonResult.preview;
             result.infos = jsonResult.infos;
+            result.fileID = parseInt(jsonResult.fileid);
             },
 
         error: function (xhr, status) {
             result.result = "KO";
             result.preview = "";
             result.infos = "";
-
+            result.fileID = -1;
         }
     });
     

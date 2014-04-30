@@ -26,24 +26,22 @@
 $l = new \OC_L10N('oclife');
 
 // Revert parameters from ajax
-$fileID = intval(filter_input(INPUT_POST, 'fileID', FILTER_SANITIZE_NUMBER_INT));
+$filePath = filter_input(INPUT_POST, 'filePath', FILTER_SANITIZE_STRING);
 
 // Check if multiple file has been choosen
-if($fileID === -1) {
-    $thumbPath = OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('fileid' => $fileID));
+if(substr($filePath, -1) === '/') {
+    $thumbPath = OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('filePath' => $filePath));
     $preview = '<img style="border: 1px solid black; display: block;" src="' . $thumbPath . '" />';
     
     $infos = '<strong>' . $l->t('Multiple files selected') . '</strong>';
 
-    $result = array('preview' => $preview, 'infos' => $infos);
+    $result = array('preview' => $preview, 'infos' => $infos, 'fileid' => -1);
 
     print json_encode($result);
     die();
 }
 
 // Begin to collect files informations
-$filePath = \OC\Files\Filesystem::getPath($fileID);
-
 /*
  *  $fileInfos contains:
  * Array ( [fileid] => 30 
@@ -63,7 +61,7 @@ $filePath = \OC\Files\Filesystem::getPath($fileID);
  */
 $fileInfos = \OC\Files\Filesystem::getFileInfo($filePath);
 
-$thumbPath = OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('fileid' => $fileInfos['fileid']));
+$thumbPath = OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('filePath' => $filePath));
 $preview = '<img style="border: 1px solid black; display: block;" src="' . $thumbPath . '" />';
 
 $infos = array();
@@ -78,11 +76,8 @@ if($fileInfos['encrypted']) {
 }
 
 // Output the result!
-$htmlInfos = '';
-foreach($infos as $row) {
-    $htmlInfos .= $row . '<br />';
-}
+$htmlInfos = implode('<br />', $infos);
 
-$result = array('preview' => $preview, 'infos' => $htmlInfos);
+$result = array('preview' => $preview, 'infos' => $htmlInfos, 'fileid' => $fileInfos['fileid']);
 
 print json_encode($result);

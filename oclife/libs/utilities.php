@@ -88,46 +88,58 @@ class utilities {
             unlink($fullThumbPath);
         }        
     }
-    
+        
     /**
-     * Get all files ID of the indicated user
-     * @param string $user Username
-     * @return array ID of all the files
-     */
-    public static function getFileList($user) {
+    * Get all files ID of the indicated user
+    * @param string $user Username
+    * @param string $path Path to get the content
+    * @param boolean $onlyID Get only the ID of files
+    * @param boolean $indexed Output result as dictionary array with fileID as index
+    * @return array ID of all the files
+    */
+    public static function getFileList($user, $path = '', $onlyID = FALSE, $indexed = FALSE) {
         $result = array();
-        
-        $userStorage = 'home::' . $user;
-        $sql = 'SELECT numeric_id FROM *PREFIX*storages WHERE id=?';
-        $args = array($userStorage);
-        $query = \OCP\DB::prepare($sql);
-        $resRsrc = $query->execute($args);
-        
-        while($row = $resRsrc->fetchRow()) {
-            $storages[] = intval($row['numeric_id']);
-        }        
-        
-        // At least one storage needed
-        if(count($storages) === 0) {
-            return -1;
-        }
-        
-        // For each storage, get the files data (fileid, path)
-        foreach($storages as $storageID) {
-            $sql = 'SELECT fileid, path, name FROM *PREFIX*filecache WHERE storage=?';
-            $args = array($storageID);
-            $query = \OCP\DB::prepare($sql);
-            $resRsrc = $query->execute($args);
 
-            while($row = $resRsrc->fetchRow()) {
-                $fileid = intval($row['fileid']);
-                $filepath = $row['path'];
-                $filename = $row['name'];
-                
-                $result[$fileid] = array('id' => $fileid, 'path' => $filepath, 'name' => $filename);
+        $dirView = new \OC\Files\View('/' . $user);
+        $dirContent = $dirView->getDirectoryContent($path);
+        
+        foreach($dirContent as $item) {
+            $itemRes = array();
+            
+            if(strpos($item['mimetype'], 'directory') === FALSE) {
+                $fileData = array('fileid'=>$item['fileid'], 'name'=>$item['name'], 'mimetype'=>$item['mimetype']);
+                $fileData['path'] = isset($item['usersPath']) ? $item['usersPath'] : $item['path'];
+                        
+                $itemRes[] = ($onlyID) ? $item['fileid'] : $fileData;
+            } else {
+                // Case by case build appropriate path
+                if(isset($item['usersPath'])) {
+                    // - this condition when usersPath is set - i.e. Shared files
+                    $itemPath = $item['usersPath'];
+                } elseif(isset($item['path'])) {
+                    // - Standard case - Normal user's folder
+                    $itemPath = $item['path'];
+                } else {
+                    // - Special folders - i.e. sharings
+                    $itemPath = 'files/' . $item['name'];
+                }
+
+                $itemRes = \OCA\OCLife\utilities::getFileList($user, $itemPath, $onlyID);
+            }            
+            
+            foreach($itemRes as $item) {
+                if($onlyID) {
+                    $result[] = intval($item);
+                } else {
+                    if($indexed) {
+                        $result[intval($item['fileid'])] = $item;
+                    } else {
+                        $result[] = $item;
+                    }
+                }
             }
         }
-        
+
         return $result;
     }
     
@@ -142,8 +154,7 @@ class utilities {
             return -1;
         }
         
-        $emptyFile = array('id'=>'', 'path'=>'', 'name'=>'');
-        $usersFile = utilities::getFileList($user);
+        $usersFile = utilities::getFileList($user, '/files', false, true);
         
         if($usersFile === -1) {
             return -2;
@@ -155,8 +166,6 @@ class utilities {
         foreach($filesID as $fileID) {
             if(isset($usersFile[$fileID])) {
                 $result[$fileID] = $usersFile[$fileID];
-            } else {
-                $result[$fileID] = $emptyFile;
             }
         }
         
@@ -174,8 +183,10 @@ class utilities {
         
         $result = '<div class="oclife_tile" data-fileid="' . $fileData['id'] . '" data-filePath="' . $pathInfo . '">';
         $result .= '<div>' . $fileData['name'] . '</div>';
-                
-        $thumbPath = \OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('fileid' => $fileData['id']));
+        
+        $filePath = strpos($fileData['path'], 'files') === FALSE ? $fileData['path'] : substr($fileData['path'], 5);
+        
+        $thumbPath = \OCP\Util::linkToAbsolute('oclife', 'getThumbnail.php', array('filePath' => $filePath));
         $result .= '<img src="' . $thumbPath . '" />';
         $result .= '</div>';
         

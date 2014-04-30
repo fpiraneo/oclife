@@ -1,42 +1,39 @@
 var canEditTag = 0;
 
 $(document).ready(
-        function() {
-            // Check if we can create / edit tags
-            $.ajax({
-                url: OC.filePath('oclife', 'ajax', 'canEditTag.php'),
-                async: false,
-                timeout: 500,
+    function() {
+        // Check if we can create / edit tags
+        $.ajax({
+            url: OC.filePath('oclife', 'ajax', 'canEditTag.php'),
+            async: false,
+            timeout: 500,
 
-                success: function(result) {
-                    canEditTag = parseInt(result);
-                },
+            success: function(result) {
+                canEditTag = parseInt(result);
+            },
 
-                error: function (xhr, status) {
-                    updateStatusBar(t('oclife', 'Unable to get user\'s priviledge.'));
-                },
+            error: function (xhr, status) {
+                updateStatusBar(t('oclife', 'Unable to get user\'s priviledge.'));
+            },
 
-                type: "GET"});            
-        });
-
+            type: "GET"});            
+    });
 
 $(document).ready(
-        function() {
-            
+    function() {
         $("#fileTable").delegate(
-                ".oclife_tile",
-                "click",
-                function(eventData) {
-                    var fileID = $(this).attr("data-fileid");
-                    var filePath = $(this).attr("data-filepath");
-                    
-                    $("#pathInfo").text(filePath);
-                    $( "#filePath" ).dialog( "open" );
-                });            
-        });
+            ".oclife_tile",
+            "click",
+            function(eventData) {
+                var fileID = $(this).attr("data-fileid");
+                var filePath = $(this).attr("data-filepath");
 
-$(function(){
-    
+                $("#pathInfo").text(filePath);
+                $("#filePath").dialog("open");
+            });            
+    });
+
+$(function(){    
     var dataPath = OC.filePath('oclife', 'ajax', 'getTags.php');
 
     $( "#expandAll" )
@@ -62,7 +59,7 @@ $(function(){
                 // Optionally tweak data.node.span
                 var nodeClass = data.node.data.class;
                 
-                if(nodeClass == 'global') {
+                if(nodeClass === 'global') {
                     var globalIconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_globe.png') + ")";
                     var span = $(data.node.span);
                     var findResult = span.find("> span.fancytree-icon");
@@ -113,8 +110,7 @@ $(function(){
                     error: function( xhr, status ) {
                         updateStatusBar(t('oclife', 'Unable to get files list!'));
                     }
-                });                      
-                
+                });
             },
 
             dnd: {
@@ -356,7 +352,7 @@ $(function(){
             },
 
             close: function() {
-                allFields.val( "" ).removeClass( "ui-state-error" );
+                allFields.val("").removeClass( "ui-state-error" );
             }
         });
         

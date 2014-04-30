@@ -22,16 +22,13 @@ OCP\JSON::checkAppEnabled('oclife');
 OCP\JSON::checkLoggedIn();
 
 // Revert parameters from ajax
-$fileID = intval(filter_input(INPUT_GET, 'fileid', FILTER_SANITIZE_NUMBER_INT));
+$filePath = filter_input(INPUT_GET, 'filePath', FILTER_SANITIZE_STRING);
 
-if($fileID === -1) {
+if(substr($filePath, -1) === '/') {
     $previewPath = __DIR__ . '/img/multiImage.png';
 } else {
     // Get current user
     $user = \OCP\User::getUser();
-
-    // Get file path
-    $filePath = \OC\Files\Filesystem::getPath($fileID);
 
     // Build user's view path
     $viewPath = '/' . $user . '/files';
@@ -40,27 +37,31 @@ if($fileID === -1) {
     $placeHolderPath = __DIR__ . '/img/noImage.png';
 
     // Build thumb path
-    $previewPath = \OC_User::getHome($user) . '/oclife/previews/' . $user . $filePath;
-    $previewPathInfo = pathinfo($previewPath);
-    $previewDir = $previewPathInfo['dirname'];
-    $thumbPath = $previewPathInfo['dirname'] . '/' . $previewPathInfo['filename'] . '.png';
+    if(isset($filePath)) {
+        $filePathInfo = pathinfo($filePath);
+        $previewPath = \OC_User::getHome($user) . '/oclife/previews/' . $user;
+        $previewDir = $previewPath . $filePathInfo['dirname'];
+        $thumbPath = $previewPath . $filePathInfo['dirname'] . '/' . $filePathInfo['filename'] . '.png';
 
-    // Check and eventually prepare preview directory
-    if (!is_dir($previewDir)) {
+        // Check and eventually prepare preview directory
+        if (!is_dir($previewDir)) {
             mkdir($previewDir, 0755, true);
+        }
+
+        // Check if thumbnail exist, create it otherwise
+        if(!file_exists($thumbPath)) {
+            $imgHandler = new \OCA\OCLife\ImageHandler();
+            $imgHandler->setHeight(320);
+            $imgHandler->setWidth(320);
+            $imgHandler->setBgColorFromValues(0, 0, 0);
+
+            $imgHandler->generateImageThumbnail($viewPath, $filePath, $thumbPath);
+        }
+
+        $previewPath = (is_file($thumbPath)) ? $thumbPath : $placeHolderPath;
+    } else {
+        $previewPath = $placeHolderPath;
     }
-
-    // Check if thumbnail exist, create it otherwise
-    if(!file_exists($thumbPath)) {
-        $imgHandler = new \OCA\OCLife\ImageHandler();
-        $imgHandler->setHeight(320);
-        $imgHandler->setWidth(320);
-        $imgHandler->setBgColorFromValues(0, 0, 0);
-
-        $imgHandler->generateImageThumbnail($viewPath, $filePath, $thumbPath);
-    }
-
-    $previewPath = (is_file($thumbPath)) ? $thumbPath : $placeHolderPath;
 }
 
 // Output the preview

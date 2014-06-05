@@ -451,7 +451,7 @@ class hTags {
             $query->execute($args);
 
             // Delete from human readable
-            $sql = 'DELETE FROM *PREFIX*oclife_humanreadable WHERE tagid=?';
+            $sql = 'DELETE FROM *PREFIX*oclife_humanReadable WHERE tagid=?';
             $args = array($id);
             $query = \OCP\DB::prepare($sql);
             $query->execute($args);

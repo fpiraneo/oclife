@@ -498,7 +498,16 @@ class hTags {
      * @return boolean TRUE if success, FALSE otherwise
      */
 	public function setTagPermission($tagID, $permission) {
-		return FALSE;	// TODO
+		if(OCA\OCLife\hTags::checkPermission($permission)) {
+			$sql = 'UPDATE *PREFIX*oclife_tags SET permission=? WHERE id=?';
+			$args = array($permission, $tagID);
+			$query = \OCP\DB::prepare($sql);
+			$query->execute($args);
+			
+			return TRUE;
+		} else {
+			return FALSE;
+		}
 	}
 
     /**
@@ -508,7 +517,12 @@ class hTags {
      * @return boolean TRUE if success, FALSE otherwise
      */
 	public function setTagGroup($tagID, $group) {
-		return FALSE;	// TODO
+        $sql = 'UPDATE *PREFIX*oclife_tags SET group=? WHERE id=?';
+        $args = array($group, $tagID);
+        $query = \OCP\DB::prepare($sql);
+        $query->execute($args);
+		
+		return TRUE;
 	}
 	
     /**

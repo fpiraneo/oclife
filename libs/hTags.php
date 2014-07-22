@@ -72,25 +72,37 @@ class hTags {
      * @param string $tagLang
      * @param string $tagDescr
      * @param integer $parentID Id of tag's parent
+	 * @param string $owner id of the owner; if NULL the actual username will be set
+	 * @param string $permission unix-style of the read/write permission of the tag
      * @return integer Newly inserted index, FALSE if parameters not valid
      */
-    public function newTag($tagLang, $tagDescr, $parentID) {
+    public function newTag($tagLang, $tagDescr, $parentID, $owner=NULL, $permission='rw----') {
         // Check if provided parameters are correct
         if(strlen(trim($tagLang)) !== 2 || trim($tagDescr) === '' || !is_int($parentID) || $parentID < -1) {
             return FALSE;
         }
+		
+		// Check if provided permissions are correct
+		if(!OCA\OCLife\hTags::checkPermission($permission)) {
+			return FALSE;
+		}
 
         // Check if tag already exists
         if(count($this->searchTag($tagLang, $tagDescr)) != 0) {
             return FALSE;
         }
+		
+		// If owner is not set, assign the actual username
+		if($owner === NULL) {
+			$owner = \OCP\User::getUser();
+		}
 
         // Proceed with creation
         $result = array();
 
         // Insert master record
-        $sql = "INSERT INTO *PREFIX*oclife_tags (parent) VALUES (?)";
-        $args = array($parentID);
+        $sql = "INSERT INTO *PREFIX*oclife_tags (parent, owner, group, permission) VALUES (?,?,?,?)";
+        $args = array($parentID, $owner, '', $permission);
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
 
@@ -177,7 +189,9 @@ class hTags {
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
         while($row = $resRsrc->fetchRow()) {
-            $result[] = $row;
+			if(OCA\OCLife\hTags::readAllowed($row['tagid']) {
+				$result[] = $row;
+			}
         }
 
         return $result;
@@ -199,15 +213,17 @@ class hTags {
         $query = \OCP\DB::prepare($sql);
         $resRsrc = $query->execute($args);
         while($row = $resRsrc->fetchRow()) {
-            $result[] = $row;
+			if(OCA\OCLife\hTags::readAllowed($row['tagid']) {
+				$result[] = $row;
+			}
         }
 
         return $result;
     }
 
     /**
-     * Return a tree array with all the tags starting from $startTag
-     * @param String $tagLang Tag language of $startTag
+     * Return a tree array with all the tags starting from 'root'
+     * @param String $tagLang Tag language 
      * @return array
      */
     public function getTagTree($tagLang) {
@@ -222,7 +238,9 @@ class hTags {
 
         $ids = array();
         while($row = $resRsrc->fetchRow()) {
-            $ids[] = intval($row['id']);
+			if(OCA\OCLife\hTags::readAllowed($row['id']) {
+				$ids[] = intval($row['id']);
+			}
         }
 
         $result = array(
@@ -261,9 +279,11 @@ class hTags {
         $resRsrc = $query->execute($args);
 
         while($row = $resRsrc->fetchRow()) {
-            $result['key'] = $row['tagid'];
-            $result['title'] = $row['descr'];
-            $result['class'] = 'global';
+			if(OCA\OCLife\hTags::readAllowed($row['tagid']) {
+				$result['key'] = $row['tagid'];
+				$result['title'] = $row['descr'];
+				$result['class'] = $row['permission'];
+			}
         }
 
         $result['children'] = array();
@@ -276,7 +296,9 @@ class hTags {
         $resRsrc = $query->execute($args);
 
         while($row = $resRsrc->fetchRow()) {
-            $childsIDs[] = $row['id'];
+			if(OCA\OCLife\hTags::readAllowed($row['id']) {
+				$childsIDs[] = $row['id'];
+			}
         }
 
         // Fetch all childs data
@@ -312,7 +334,7 @@ class hTags {
             }
 
             if(count($parentData) != 1) {
-                throw new Exception("Bad or no parent data found - $parent");
+                throw new \Exception("Bad or no parent data found - $parent");
             }
         }
 
@@ -330,7 +352,7 @@ class hTags {
             }
 
             if(count($tagData) != 1) {
-                throw new Exception("Bad or no child data found - $tag");
+                throw new \Exception("Bad or no child data found - $tag");
             }
         }
 
@@ -371,7 +393,9 @@ class hTags {
         $resRsrc = $query->execute($args);
 
         while($row = $resRsrc->fetchRow()) {
-            $result[] = $row['id'];
+			if(OCA\OCLife\hTags::readAllowed($row['id']) {
+				$result[] = $row['id'];
+			}
         }
 
         // Fetch all childs id
@@ -421,6 +445,11 @@ class hTags {
         if(!is_int($tagID)) {
             return FALSE;
         }
+		
+		// Check if the tag can be written
+		if(!OCA\OCLife\hTags::writeAllowed($row['id']) {
+			return FALSE;
+		}
 
         // Get all id of childs
         $tagsToDelete = $this->getAllChildID($tagID);
@@ -444,22 +473,44 @@ class hTags {
 
         // Execute deletion
         foreach ($tagsToDelete as $id) {
-            // Delete from tags
-            $sql = 'DELETE FROM *PREFIX*oclife_tags WHERE id=?';
-            $args = array($id);
-            $query = \OCP\DB::prepare($sql);
-            $query->execute($args);
+			if(OCA\OCLife\hTags::writeAllowed($id) {
+				// Delete from tags
+				$sql = 'DELETE FROM *PREFIX*oclife_tags WHERE id=?';
+				$args = array($id);
+				$query = \OCP\DB::prepare($sql);
+				$query->execute($args);
 
-            // Delete from human readable
-            $sql = 'DELETE FROM *PREFIX*oclife_humanReadable WHERE tagid=?';
-            $args = array($id);
-            $query = \OCP\DB::prepare($sql);
-            $query->execute($args);
+				// Delete from human readable
+				$sql = 'DELETE FROM *PREFIX*oclife_humanReadable WHERE tagid=?';
+				$args = array($id);
+				$query = \OCP\DB::prepare($sql);
+				$query->execute($args);
+			}		
         }
 
         return TRUE;
     }
 
+    /**
+     * Modify permission on a tag
+     * @param integer $tagID ID of tag to be modified
+     * @param string $permission Permission to be set on the tag
+     * @return boolean TRUE if success, FALSE otherwise
+     */
+	public function setTagPermission($tagID, $permission) {
+		return FALSE;	// TODO
+	}
+
+    /**
+     * Modify group for a tag
+     * @param integer $tagID ID of tag to be modified
+     * @param string $group Group to be set on a tag
+     * @return boolean TRUE if success, FALSE otherwise
+     */
+	public function setTagGroup($tagID, $group) {
+		return FALSE;	// TODO
+	}
+	
     /**
      * Add a tag for a file ID
      * @param integer $fileID File ID where to add the tag
@@ -578,7 +629,6 @@ class hTags {
         return $result;
     }
 
-
     /**
      * Get all tags for a file ID
      * @param type $fileID
@@ -618,16 +668,19 @@ class hTags {
      * @return array ID of the files marked with the tag
      */
     public static function getFileWithTag($tagID) {
-        $result = array();
-        $sql = 'SELECT fileid FROM *PREFIX*oclife_docTags WHERE tagid=?';
-        $args = array($tagID);
-        $query = \OCP\DB::prepare($sql);
-        $resRsrc = $query->execute($args);
+		$result = array();
+		
+		if(OCA\OCLife\hTags::readAllowed($tagID) {
+			$sql = 'SELECT fileid FROM *PREFIX*oclife_docTags WHERE tagid=?';
+			$args = array($tagID);
+			$query = \OCP\DB::prepare($sql);
+			$resRsrc = $query->execute($args);
 
-        while($row = $resRsrc->fetchRow()) {
-            $result[] = intval($row['fileid']);
-        }
-
+			while($row = $resRsrc->fetchRow()) {
+				$result[] = intval($row['fileid']);
+			}
+		}
+		
         return $result;
     }
 
@@ -651,4 +704,158 @@ class hTags {
 
         return $uniquesID;
     }
+	
+	/**
+	 *  Get valid patterns for permissions
+	 *  @return array Valid patterns
+	 */
+	private static function getValidPatterns() {
+		return array(
+			'r-----',	/* user owned but locked */
+			'rw----',	/* user owned */
+			'rwr---',	/* user owned, group can read */
+			'rwrw--',	/* group owned */
+			'rwrwr-',	/* group owned, everyone can read */
+			'rwrwrw'	/* global tag */
+		);
+	}
+	
+	/**
+	 *  Check if provided unix-style permissions are valid
+	 *  @param $permission string Permission to be checked
+	 *  @return boolean TRUE if permission is valid, false otherwise
+	 */
+	private static function checkPermission($permission) {
+		// Check for length
+		if(strlen($permission) != 6) {
+			return FALSE;
+		}
+		
+		// Check against valid patterns
+		$validPatterns = OCA\OCLife\hTags::getValidPatterns();
+		$pos = array_find($permission, $validPatterns);
+		
+		return ($pos === FALSE) ? FALSE : TRUE;
+	}
+	
+	/**
+	 *  Check if provided tag id can be modified by the provided user
+	 *  @param $tagid integer Tag id
+	 *  @param $user string Actual user; NULL pickup actual logged in user
+	 *  @return boolean TRUE if permission is valid, false otherwise
+	 */	
+	public static function writeAllowed($tagid, $user = NULL) {
+		// If owner is not set, assign the actual username
+		if($user === NULL) {
+			$user = \OCP\User::getUser();
+		}
+		
+        // Query for actual tag's owner and permission
+        $sql = "SELECT owner, group, permission FROM *PREFIX*oclife_tags WHERE id=?";
+        $args = array($tagid);
+
+        $query = \OCP\DB::prepare($sql);
+        $resRsrc = $query->execute($args);
+		
+		$owner = NULL;
+		$permission = NULL;
+		
+        while($row = $resRsrc->fetchRow()) {
+            // Legacy check - if not valid pattern set user rw
+			if(isset($row['permission']) {
+				$permission = $row['permission'];
+				
+				if(!OCA\OCLife\hTags::checkPermission($permission)) {
+					$permission = 'rw----';
+				}
+			} else {
+				$permission = 'rw----';
+			}
+			
+			// Legacy check - owner is not set, set actual user
+			$owner = (isset($row['owner']) ? $row['owner'] : \OCP\User::getUser();
+			
+			// Legacy check - group is not set, this tag don't belong to any group
+			$group = (isset($row['group']) ? $row['group'] : NULL;
+        }
+		
+		// Check for operating on owner's tag
+		if($user === $owner) {
+			return (substr($permission, 1, 1) === 'w') ? TRUE : FALSE;
+		}
+		
+		// Check for tags owned by group where $user belongs to
+		if(substr($permission, 3, 1) === 'w') {
+			$userGroups = \OC\Group::getUserGroups($user);
+			$groupPos = array_search($group, $userGroups);
+			
+			return ($groupPos === FALSE) ? FALSE : TRUE;
+		} else {
+			return FALSE;
+		}
+		
+		// Check if worldwide writeable
+		return (substr($permission, 5, 1) === 'w') ? TRUE : FALSE;
+	}
+	
+	/**
+	 *  Check if provided tag id can be read by the provided user
+	 *  @param $tagid integer Tag id
+	 *  @param $user string Actual user; NULL pickup actual logged in user
+	 *  @return boolean TRUE if permission is valid, false otherwise
+	 */	
+	public static function readAllowed($tagid, $user = NULL) {
+		// If owner is not set, assign the actual username
+		if($user === NULL) {
+			$user = \OCP\User::getUser();
+		}
+		
+        // Query for actual tag's owner and permission
+        $sql = "SELECT owner, group, permission FROM *PREFIX*oclife_tags WHERE id=?";
+        $args = array($tagid);
+
+        $query = \OCP\DB::prepare($sql);
+        $resRsrc = $query->execute($args);
+		
+		$owner = NULL;
+		$permission = NULL;
+		
+        while($row = $resRsrc->fetchRow()) {
+            // Legacy check - if not valid pattern set user rw
+			if(isset($row['permission']) {
+				$permission = $row['permission'];
+				
+				if(!OCA\OCLife\hTags::checkPermission($permission)) {
+					$permission = 'rw----';
+				}
+			} else {
+				$permission = 'rw----';
+			}
+			
+			// Legacy check - owner is not set, set actual user
+			$owner = (isset($row['owner']) ? $row['owner'] : \OCP\User::getUser();
+			
+			// Legacy check - group is not set, this tag don't belong to any group
+			$group = (isset($row['group']) ? $row['group'] : NULL;
+        }
+		
+		// Check for operating on owner's tag
+		if($user === $owner) {
+			return (substr($permission, 0, 1) === 'r') ? TRUE : FALSE;
+		}
+		
+		// Check for tags owned by group where $user belongs to
+		if(substr($permission, 2, 1) === 'r') {
+			$userGroups = \OC\Group::getUserGroups($user);
+			$groupPos = array_search($group, $userGroups);
+			
+			return ($groupPos === FALSE) ? FALSE : TRUE;
+		} else {
+			return FALSE;
+		}
+		
+		// Check if worldwide writeable
+		return (substr($permission, 4, 1) === 'r') ? TRUE : FALSE;
+	}
+
 }

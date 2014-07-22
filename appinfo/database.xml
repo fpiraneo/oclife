@@ -6,81 +6,154 @@
 	<charset>utf8</charset>
 
 	<table>
-            <name>*dbprefix*oclife_tags</name>
-            <declaration>
-                <field>
-                    <name>id</name>
-                    <type>integer</type>
-                    <default>0</default>
-                    <notnull>true</notnull>
-                    <autoincrement>1</autoincrement>
-                    <length>11</length>
-                </field>
-                
-                <field>
-                    <name>parent</name>
-                    <type>integer</type>
-                    <default>0</default>
-                    <notnull>true</notnull>
-                    <length>11</length>
-                </field>
-            </declaration>
+		<!--
+			Table containing all tag's data
+		-->
+	
+		<name>*dbprefix*oclife_tags</name>
+		<declaration>
+			<field>
+				<!--
+					The id of the tag
+				-->
+				<name>id</name>
+				<type>integer</type>
+				<default>0</default>
+				<notnull>true</notnull>
+				<autoincrement>1</autoincrement>
+				<length>11</length>
+			</field>
+			
+			<field>
+				<!--
+					Parent tag id
+				-->
+				<name>parent</name>
+				<type>integer</type>
+				<default>0</default>
+				<notnull>true</notnull>
+				<length>11</length>
+			</field>
+
+			<field>
+				<!--
+					Who is the creator of the tag: The username.
+				-->
+				<name>owner</name>
+				<type>text</type>
+				<default></default>
+				<notnull>true</notnull>
+				<length>64</length>
+			</field>			
+			
+			<field>
+				<!--
+					Group owning of the tag: default to '' (nobody)
+				-->
+				<name>group</name>
+				<type>text</type>
+				<default></default>
+				<notnull>true</notnull>
+				<length>64</length>
+			</field>			
+			
+			<field>
+				<!--
+					This field is like a unix-style permission for a file
+					in the format of rwrwrw where: first rw means read and
+					write permission for the owner, second rw for the user's
+					group and third for all users and group.
+				-->
+				<name>permission</name>
+				<type>text</type>
+				<default></default>
+				<notnull>true</notnull>
+				<length>6</length>
+			</field>
+		</declaration>
 	</table>
 
-        <table>
-            <name>*dbprefix*oclife_humanReadable</name>
-            <declaration>
-                <field>
-                    <name>tagid</name>
-                    <type>integer</type>
-                    <default>0</default>
-                    <notnull>true</notnull>
-                    <length>11</length>
-                </field>
-                
-                <field>
-                    <name>lang</name>
-                    <type>text</type>
-                    <notnull>true</notnull>
-                    <length>2</length>
-                </field>
-                
-                <field>
-                    <name>descr</name>
-                    <type>text</type>
-                    <notnull>true</notnull>
-                    <length>80</length>
-                </field>                
-            </declaration>
-        </table>
-        
-        <table>
-            <name>*dbprefix*oclife_docTags</name>
-            <declaration>
-                <field>
-                    <name>id</name>
-                    <type>integer</type>
-                    <default>0</default>
-                    <notnull>true</notnull>
-                    <autoincrement>1</autoincrement>
-                    <length>8</length>
-                </field>
-                
-                <field>
-                    <name>fileid</name>
-                    <type>integer</type>
-                    <default>0</default>
-                    <notnull>true</notnull>
-                    <length>11</length>
-                </field>
+	<table>
+		<!--
+			Table containing tag's description and the language of the description
+		-->
+		<name>*dbprefix*oclife_humanReadable</name>
+		<declaration>
+			<field>
+				<!--
+					The id of the tag
+				-->
+				<name>tagid</name>
+				<type>integer</type>
+				<default>0</default>
+				<notnull>true</notnull>
+				<length>11</length>
+			</field>
+			
+			<field>
+				<!--
+					Language in two letter formats like: en, it, fr, de, ...
+					NOTE: "xx" means: Default language - Description suitable for
+					all languages.
+				-->
+				<name>lang</name>
+				<type>text</type>
+				<notnull>true</notnull>
+				<length>2</length>
+			</field>
+			
+			<field>
+				<!--
+					Description of the tag on the indicated language
+				-->
+				<name>descr</name>
+				<type>text</type>
+				<notnull>true</notnull>
+				<length>80</length>
+			</field>                
+		</declaration>
+	</table>
+    
+	<table>
+		<!--
+			Table containing the tagging of the files:
+			The association of the tags to each file
+		-->
+		<name>*dbprefix*oclife_docTags</name>
+		<declaration>
+			<field>
+				<!--
+					Entry ID
+				-->
+				<name>id</name>
+				<type>integer</type>
+				<default>0</default>
+				<notnull>true</notnull>
+				<autoincrement>1</autoincrement>
+				<length>8</length>
+			</field>
+			
+			<field>
+				<!--
+					The id of the tagged file
+				-->
+				<name>fileid</name>
+				<type>integer</type>
+				<default>0</default>
+				<notnull>true</notnull>
+				<length>11</length>
+			</field>
 
-                <field>
-                    <name>tagid</name>
-                    <type>integer</type>
-                    <default>0</default>
-                    <notnull>true</notnull>
-                    <length>11</length>
-                </field>
-            </declaration>
-        </table>
+			<field>
+				<!--
+					The id of the tag
+				-->
+				<name>tagid</name>
+				<type>integer</type>
+				<default>0</default>
+				<notnull>true</notnull>
+				<length>11</length>
+			</field>
+		</declaration>
+	</table>
 </database>

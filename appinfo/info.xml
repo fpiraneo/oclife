@@ -2,8 +2,13 @@
 <info>
 	<id>oclife</id>
 	<name>OCLife</name>
-	<description>Add and manage hierarchical tags to your documents.</description>
-	<version>0.0.2</version>
+	<description>
+		Add and manage hierarchical tags to your documents.
+		ocLife include functionalities to preview pictures and files in many format
+		through the help of ImageMagick (optional).
+		For any help and / or feature improvements write to the author.
+	</description>
+	<version>0.1.0</version>
 	<licence>GNU GPL Version 3</licence>
 	<author>Francesco PIRANEO G. (fpiraneo@gmail.com)</author>
 	<require>6</require>

@@ -91,6 +91,7 @@ class utilities {
         
     /**
     * Get all files ID of the indicated user
+	* TODO: Check if this function gives back only the files the user can access.
     * @param string $user Username
     * @param string $path Path to get the content
     * @param boolean $onlyID Get only the ID of files
@@ -124,7 +125,7 @@ class utilities {
                     $itemPath = 'files/' . $item['name'];
                 }
 
-                $itemRes = \OCA\OCLife\utilities::getFileList($user, $itemPath, $onlyID);
+                $itemRes = \OCA\OCLife\utilities::getFileList($user, $itemPath, $onlyID, $indexed);
             }            
             
             foreach($itemRes as $item) {
@@ -174,11 +175,10 @@ class utilities {
     
     /**
      * Prepare an image tile
-     * @param array $fileData File data
+     * @param array $fileData File data with this structure: array('id'=>'', 'path'=>'', 'name'=>'')
      * @return string
      */
     public static function prepareTile($fileData) {
-        // $fileData = array('id'=>'', 'path'=>'', 'name'=>'')
         $pathInfo = substr(pathinfo($fileData['path'], PATHINFO_DIRNAME), 6); 
         
         $result = '<div class="oclife_tile" data-fileid="' . $fileData['id'] . '" data-filePath="' . $pathInfo . '">';

@@ -52,7 +52,7 @@ $l = new \OC_L10N('oclife');
     </div>
 </div>
 
-<div div data-layout='{"type": "border", "hgap": 5, "vgap": 3}' class="oclife_content" id="oclife_content">
+<div data-layout='{"type": "border", "hgap": 5, "vgap": 3}' class="oclife_content" id="oclife_content">
     <div class="west" id="tagscontainer">
         <div class="oclife_tagtree" id="tagstree">
         </div>

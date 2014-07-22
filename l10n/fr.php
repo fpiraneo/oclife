@@ -25,6 +25,7 @@ $TRANSLATIONS = array(
     'NOTE: ' => 'NOTE: ',
     'Also child tags will be removed!' => 'Les tags fils seront également effacées!',
     'Where is this file?' => 'Ou se trouve ce document?',
+	'Image preview' => 'Aperçu de l\'image',
     'You can find this file here:' => 'Ce fichier se trouve ici:',
     'Associated files' => 'Documents liés',
     'Select one or more tags to view the associated files.' => 'Selectionner un ou plusieurs tags pour voir les documents associés.',

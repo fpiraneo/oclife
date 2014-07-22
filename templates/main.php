@@ -52,6 +52,11 @@ $l = new \OC_L10N('oclife');
     </div>
 </div>
 
+<div id="imagePreview" title="<?php p($l->t('Image preview')) ?>"> 
+	<div id="previewPath" style="padding: 5px 5px 0px 0px; font-weight: bold;">filePath</div>
+    <img id="previewArea" src="" />
+</div>
+
 <div data-layout='{"type": "border", "hgap": 5, "vgap": 3}' class="oclife_content" id="oclife_content">
     <div class="west" id="tagscontainer">
         <div class="oclife_tagtree" id="tagstree">

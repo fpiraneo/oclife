@@ -1,4 +1,5 @@
 var canEditTag = 0;
+var previewShown = false;
 
 $(document).ready(
     function() {
@@ -28,10 +29,44 @@ $(document).ready(
                 var fileID = $(this).attr("data-fileid");
                 var filePath = $(this).attr("data-filepath");
 
-                $("#pathInfo").text(filePath);
-                $("#filePath").dialog("open");
-            });            
+				showPreview(filePath);
+            });
+		
+		$(window).resize(function(){
+			if(previewShown) {
+				adjustPreview();
+			}
+		}).resize();
+		
+        $("#fileTable").delegate(
+            "#imagePreview",
+            "click",
+            function(eventData) {
+                $("#imagePreview").dialog("close");
+            });
     });
+
+	function adjustPreview() {
+		var maskHeight = $(window).height();  
+		var maskWidth = $(window).width();
+		var prevWidth = 800;
+		var prevHeight = 650;
+		var dialogTop =  (maskHeight  - prevHeight) / 2;  
+		var dialogLeft = (maskWidth - prevWidth) / 2; 
+	
+		$("#previewPath").text(filePath);
+		$("#imagePreview").css({top: dialogTop, left: dialogLeft, width: prevWidth, height: prevHeight, position: "fixed"});
+	}
+	
+	function showPreview(filePath) {
+		$("#previewPath").text(filePath);
+		adjustPreview();
+		var thumbPath = OC.filePath("oclife", "", "getPreview.php") + "?filepath=" + encodeURIComponent(filePath);
+		$("#previewArea").attr("src", thumbPath);
+		$("#imagePreview").dialog("open");
+
+		previewShown = true;
+	}
 
 $(function(){    
     var dataPath = OC.filePath('oclife', 'ajax', 'getTags.php');

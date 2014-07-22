@@ -44,7 +44,7 @@ if(substr($filePath, -1) === '/') {
         $thumbPath = $previewPath . $filePathInfo['dirname'] . '/' . $filePathInfo['filename'] . '.png';
 
         // Check and eventually prepare preview directory
-        if (!is_dir($previewDir)) {
+        if(!is_dir($previewDir)) {
             mkdir($previewDir, 0755, true);
         }
 

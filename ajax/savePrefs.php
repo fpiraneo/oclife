@@ -21,10 +21,9 @@
 OCP\User::checkAdminUser();
 OCP\JSON::callCheck();
 
-$onlyAdminCanEdit = filter_input(INPUT_POST, 'onlyAdminCanEdit', FILTER_SANITIZE_STRING);
+$result = array();
+
 $useImageMagick = filter_input(INPUT_POST, 'useImageMagick', FILTER_SANITIZE_STRING);
+$result[0] = OCP\Config::setAppValue('oclife', 'useImageMagick', ($useImageMagick === 'true') ? 1 : 0);
 
-$result_1 = OCP\Config::setAppValue('oclife', 'onlyAdminCanEdit', ($onlyAdminCanEdit === 'true') ? 1 : 0);
-$result_2 = OCP\Config::setAppValue('oclife', 'useImageMagick', ($useImageMagick === 'true') ? 1 : 0);
-
-echo ($result_1 & $result_2) ? 'OK' : 'KO';
+echo $result[0] ? 'OK' : 'KO';

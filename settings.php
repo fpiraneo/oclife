@@ -25,11 +25,9 @@ $l = new \OC_L10N('oclife');
 
 OCP\Util::addscript('oclife', 'oclife/oclife_admin');
 
-$onlyAdminCanEdit = intval(OCP\Config::getAppValue('oclife', 'onlyAdminCanEdit'));
 $useImageMagick = intval(OCP\Config::getAppValue('oclife', 'useImageMagick'));
 
 $tmpl = new \OCP\Template('oclife', 'settings');
-$tmpl->assign('onlyAdminCanEdit', ($onlyAdminCanEdit === 1) ? 'CHECKED' : '');
 $tmpl->assign('useImageMagick', ($useImageMagick === 1) ? 'CHECKED' : '');
 
 $imagick = extension_loaded('imagick');

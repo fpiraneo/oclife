@@ -4,7 +4,6 @@ $TRANSLATIONS = array(
     // - php and templates
     'ImageMagick is loaded and ready to be used' => 'ImageMagick chargé et prêt à l\'utilisation',
     'ImageMagick is not loaded: Please refers to php manual.' => 'ImageMagick non chargé: Vérifier le manuel php.',
-    'Only admins can edit tags' => 'Seuls les administrateurs peuvent modifier les tags',
     'Use ImageMagick instead of GD (More image formats handled)' => 'Utiliser ImageMagick au lieu de GD (Plus de formats d\'images supportés)',
 
     // - JavaScript
@@ -59,7 +58,6 @@ $TRANSLATIONS = array(
     // Extended info popup
     // - JavaScript
     'Tag selected files' => 'Tag documents sélectionnées',
-    'Unable to get user\'s priviledge.' => 'Impossible de lire les privileges utilisateur.',
     'Informations' => 'Informations',
     'Enter tags here' => 'Entrer les tags ici',
     'File(s) where the tags will be applied' => 'Documents auquels seront appliqués les tags',

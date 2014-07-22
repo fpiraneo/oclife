@@ -1,24 +1,4 @@
-var canEditTag = 0;
 var previewShown = false;
-
-$(document).ready(
-    function() {
-        // Check if we can create / edit tags
-        $.ajax({
-            url: OC.filePath('oclife', 'ajax', 'canEditTag.php'),
-            async: false,
-            timeout: 500,
-
-            success: function(result) {
-                canEditTag = parseInt(result);
-            },
-
-            error: function (xhr, status) {
-                updateStatusBar(t('oclife', 'Unable to get user\'s priviledge.'));
-            },
-
-            type: "GET"});            
-    });
 
 $(document).ready(
     function() {
@@ -153,7 +133,7 @@ $(function(){
                     preventRecursiveMoves: true, // Prevent dropping nodes on own descendants
                     autoExpandMS: 400,
                     dragStart: function(node, data) {
-                      return canEditTag === 1;
+                      return TRUE;
                     },
                     dragEnter: function(node, data) {
                        return true;
@@ -188,15 +168,11 @@ $(function(){
                   
             contextMenu: {
                     menu: function () {
-                        if(canEditTag === 1) {
-                            return {
-                                'edit' : { 'name': t('oclife', 'Rename'), 'icon': 'edit' },
-                                'new': { 'name': t('oclife', 'New'), 'icon': 'add' },
-                                'delete': { 'name': t('oclife', 'Delete'), 'icon': 'delete'}
-                            };
-                        } else {
-                            return {'nothing' : {'name': t('oclife', 'Nothing possible'), 'icon':'delete', disabled: true}};
-                        }
+						return {
+							'edit' : { 'name': t('oclife', 'Rename'), 'icon': 'edit' },
+							'new': { 'name': t('oclife', 'New'), 'icon': 'add' },
+							'delete': { 'name': t('oclife', 'Delete'), 'icon': 'delete'}
+						};
                     },
                     
                     actions: function(node, action, options) {

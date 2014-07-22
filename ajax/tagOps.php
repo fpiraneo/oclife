@@ -18,13 +18,8 @@
  * along with oclife.  If not, see <http://www.gnu.org/licenses/>.
  */
 \OCP\JSON::callCheck();
-$onlyAdminCanEdit = intval(OCP\Config::getAppValue('oclife', 'onlyAdminCanEdit'));
-OCP\JSON::checkAppEnabled('oclife');
-if($onlyAdminCanEdit) {
-    OCP\User::checkAdminUser();
-} else {
-    OCP\User::checkLoggedIn();
-}
+\OCP\JSON::checkAppEnabled('oclife');
+\OCP\User::checkLoggedIn();
 
 // Check for a valid operation to perform
 $tagOp = filter_input(INPUT_POST, 'tagOp', FILTER_SANITIZE_STRING);

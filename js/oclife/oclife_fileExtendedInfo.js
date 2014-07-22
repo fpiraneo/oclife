@@ -1,9 +1,3 @@
-//TODO
-// - Non recupera le tag di gruppo
-
-// Check if we can create / edit tags
-var canEditTag = 0;
-
 $(document).ready(function(){
     // no versions actions in public mode
     // beware of https://github.com/owncloud/core/issues/4545
@@ -35,21 +29,6 @@ $(document).ready(function(){
                 showFileInfo(fileName);
         });
     }
-
-    $.ajax({
-        url: OC.filePath('oclife', 'ajax', 'canEditTag.php'),
-        async: false,
-        timeout: 500,
-
-        success: function(result) {
-            canEditTag = parseInt(result);
-        },
-
-        error: function (xhr, status) {
-            window.alert(t('oclife', 'Unable to Get user\'s priviledge.'));
-        },
-
-        type: "GET"});
 
     // This is the div where informations will appears
     $('#content').append('<div id="oclife_infos" title="' + t('oclife', 'Informations') + '">\n\
@@ -147,11 +126,7 @@ function handleTagAdd(eventData, selFileID) {
     var newTag = (tagID.toString() === tagLabel);
 
     if(newTag) {
-        var createNew = false;
-
-        if(canEditTag === 1) {
-            createNew = window.confirm(t('oclife', 'The tag "') + eventData.token.label + t('oclife', '" doesn\'t exist; would you like to create a new one?'));                                                        
-        }
+        var createNew = window.confirm(t('oclife', 'The tag "') + eventData.token.label + t('oclife', '" doesn\'t exist; would you like to create a new one?'));                                                        
 
         if(!createNew) {
             $(eventData.relatedTarget).addClass('invalid');

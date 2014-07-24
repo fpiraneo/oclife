@@ -54,7 +54,18 @@ $TRANSLATIONS = array(
     'Tag not removed! Data base error!' => 'Tag non rimossa! Errore data base!',
     'Tags not removed! Ajax error!' => 'Tag non rimossa! Errore Ajax!',
     'Confirm' => 'Conferma',
-    
+	'Priviledges' => 'Privilegi',
+	'User - Readonly' => 'Utente - Sola lettura',
+	'User' => 'Utente',
+	'Group - Readonly' => 'Gruppo - Sola lettura',
+	'Group' => 'Gruppo',
+	'Global - Readonly' => 'Globale - Sola lettura',
+	'Global' => 'Globale',
+	'Priviledge changed successfully!' => 'Privilegi modificati con successo',
+	'Priviledge not changed! Data base error!' => 'Privilegi non cambiati! Errore data base!',
+    'Priviledge not changed! Ajax error!' => 'Privilegi non cambiati! Errore Ajax!',
+	'Priviledge not changed! Permission denied!' => 'Privilegi non cambiati! Permesso negato!',
+	
     // Extended info popup
     // - JavaScript
     'Tag selected files' => 'Tag documenti selezionati',

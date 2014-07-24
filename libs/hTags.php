@@ -511,6 +511,63 @@ class hTags {
 	}
 
     /**
+     * Get permission of a tag
+     * @param integer $tagID ID of tag to be queried
+     * @return string Actual tag permission, FALSE in case of failure
+     */
+	public function getTagPermission($tagID) {
+		$sql = 'SELECT permission FROM *PREFIX*oclife_tags WHERE id=?';
+		$args = array($permission, $tagID);
+		$query = \OCP\DB::prepare($sql);			
+		$resRsrc = $query->execute($args);
+
+		$result = FALSE;
+		while($row = $resRsrc->fetchRow()) {
+			$result = $row['permission'];
+		}
+		
+		return $result;
+	}
+
+    /**
+     * Get owner of a tag
+     * @param integer $tagID ID of tag to be queried
+     * @return string Actual tag owner, FALSE in case of failure
+     */
+	public function getTagOwner($tagID) {
+		$sql = 'SELECT owner FROM *PREFIX*oclife_tags WHERE id=?';
+		$args = array($permission, $tagID);
+		$query = \OCP\DB::prepare($sql);			
+		$resRsrc = $query->execute($args);
+
+		$result = FALSE;
+		while($row = $resRsrc->fetchRow()) {
+			$result = $row['owner'];
+		}
+		
+		return $result;
+	}
+
+    /**
+     * Get group of a tag
+     * @param integer $tagID ID of tag to be queried
+     * @return string Actual tag group, FALSE in case of failure
+     */
+	public function getTagGroup($tagID) {
+		$sql = 'SELECT group FROM *PREFIX*oclife_tags WHERE id=?';
+		$args = array($permission, $tagID);
+		$query = \OCP\DB::prepare($sql);			
+		$resRsrc = $query->execute($args);
+
+		$result = FALSE;
+		while($row = $resRsrc->fetchRow()) {
+			$result = $row['group'];
+		}
+		
+		return $result;
+	}
+
+    /**
      * Modify group for a tag
      * @param integer $tagID ID of tag to be modified
      * @param string $group Group to be set on a tag

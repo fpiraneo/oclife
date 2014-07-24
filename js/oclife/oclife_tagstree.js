@@ -73,44 +73,44 @@ $(function(){
 
 		renderNode: function(event, data) {
 			// Optionally tweak data.node.span
-			var nodeClass = data.node.data.class;
-			var globalIconCSS = '';
+			var nodeClass = data.node.data.permission;
+			var iconCSS = '';
 			
 			switch(nodeClass) {
 				case 'r-----': {
-					globalIconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_person_red.png') + ")";
+					iconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_person_red.png') + ")";
 					break;
 				}
 				
 				case 'rw----': {
-					globalIconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_person_green.png') + ")";
+					iconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_person_green.png') + ")";
 					break;
 				}
 				
 				case 'rwr---': {
-					globalIconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_group_red.png') + ")";
+					iconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_group_red.png') + ")";
 					break;
 				}
 				
 				case 'rwrw--': {
-					globalIconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_group_green.png') + ")";
+					iconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_group_green.png') + ")";
 					break;
 				}
 				
 				case 'rwrwr-': {
-					globalIconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_globe_red.png') + ")";
+					iconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_globe_red.png') + ")";
 					break;
 				}
 				
 				case 'rwrwrw': {
-					globalIconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_globe_green.png') + ")";
+					iconCSS = "URL(" + OC.filePath('oclife', 'img', 'fancytree/icon_globe_green.png') + ")";
 					break;
 				}
 			}
 
 			var span = $(data.node.span);
 			var findResult = span.find("> span.fancytree-icon");
-			findResult.css("backgroundImage", globalIconCSS);
+			findResult.css("backgroundImage", iconCSS);
 			findResult.css("backgroundPosition", "0 0");
 		 },
 
@@ -388,7 +388,7 @@ $(function(){
 						var nodeData = {
 							'title': resultData.title,
 							'key': parseInt(resultData.key),
-							'class': resultData.class
+							'permission': resultData.permission
 						};
 						var newNode = parentNode.addChildren(nodeData);
 						newNode.setActive(true);
@@ -474,7 +474,7 @@ $(function(){
 						var nodeData = {
 							'title': resArray.title,
 							'key': parseInt(resArray.key),
-							'class': resArray.class
+							'permission': resArray.permission
 						};
 						var newNode = node.addChildren(nodeData);
 						node.setExpanded(true);

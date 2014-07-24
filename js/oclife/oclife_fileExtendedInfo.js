@@ -3,30 +3,30 @@ $(document).ready(function(){
     // beware of https://github.com/owncloud/core/issues/4545
     // as enabling this might hang Chrome
     if($('#isPublic').val()){
-            return;
+		return;
     }
 
     // Add tags button to 'files/index.php'
     if(typeof FileActions !== 'undefined') {
-            // Add action to tag a group of files
-            $(".selectedActions").html(function(index, oldhtml) {
-                if(oldhtml.indexOf("download") > 0) {
-                    var tagIconPath = OC.imagePath('oclife','icon_tag');
-                    var newAction = "<a class=\"donwload\" id=\"tagGroup\">";
-                    newAction += "<img class=\"svg\" src=\"" + tagIconPath + "\" alt=\"Tag group of file\" style=\"width: 17px; height: 17px; margin: 0px 5px 0px 5px;\" />";
-                    newAction += t('oclife', 'Tag selected files') + "</a>";
-                    return newAction + oldhtml;
-                } else {
-                    return oldhtml;
-                }
-            });
-            
-            var infoIconPath = OC.imagePath('oclife','icon_info');
-            FileActions.register('file', t('oclife', 'Informations'), OC.PERMISSION_UPDATE, infoIconPath, function(fileName) {
-                // Action to perform when clicked
-                if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
+		// Add action to tag a group of files
+		$(".selectedActions").html(function(index, oldhtml) {
+			if(oldhtml.indexOf("download") > 0) {
+				var tagIconPath = OC.imagePath('oclife','icon_tag');
+				var newAction = "<a class=\"donwload\" id=\"tagGroup\">";
+				newAction += "<img class=\"svg\" src=\"" + tagIconPath + "\" alt=\"Tag group of file\" style=\"width: 17px; height: 17px; margin: 0px 5px 0px 5px;\" />";
+				newAction += t('oclife', 'Tag selected files') + "</a>";
+				return newAction + oldhtml;
+			} else {
+				return oldhtml;
+			}
+		});
+		
+		var infoIconPath = OC.imagePath('oclife','icon_info');
+		FileActions.register('file', t('oclife', 'Informations'), OC.PERMISSION_UPDATE, infoIconPath, function(fileName) {
+			// Action to perform when clicked
+			if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
 
-                showFileInfo(fileName);
+			showFileInfo(fileName);
         });
     }
 
@@ -78,7 +78,7 @@ $(document).ready(function(){
         }        
     });
 
-    $( "#oclife_filesGroup" ).on("change", function() {
+    $("#oclife_filesGroup").on("change", function() {
         var selFilePath = $("#oclife_filesGroup").val();
 
         if(selFilePath.substr(selFilePath.length - 1) === '/') {
@@ -331,105 +331,105 @@ function showFileGroupInfo(files) {
 }
 
 function populateFileInfo(filePath) {
-        // Get file infos
-        var fileInfos = getFileInfo(filePath);
-        
-        $('#oclife_multiPreview').html(fileInfos.preview);
-        $('#oclife_multInfosData').html(fileInfos.infos);
-        
-        $('#oclife_allfiles_tags, #oclife_selfiles_tags').tokenfield({
-          autocomplete: {
-            source:  function(request, response) {
-                $.ajax({
-                        url: OC.filePath('oclife', 'ajax', 'getTagFlat.php'),
+	// Get file infos
+	var fileInfos = getFileInfo(filePath);
+	
+	$('#oclife_multiPreview').html(fileInfos.preview);
+	$('#oclife_multInfosData').html(fileInfos.infos);
+	
+	$('#oclife_allfiles_tags, #oclife_selfiles_tags').tokenfield({
+	  autocomplete: {
+		source:  function(request, response) {
+			$.ajax({
+					url: OC.filePath('oclife', 'ajax', 'getTagFlat.php'),
 
-                        data: {
-                            term: request.term
-                        },
+					data: {
+						term: request.term
+					},
 
-                        success: function(data) {
-                            var returnString = data;
-                            var jsonResult = jQuery.parseJSON(returnString);
-                            response(jsonResult);
-                        },
+					success: function(data) {
+						var returnString = data;
+						var jsonResult = jQuery.parseJSON(returnString);
+						response(jsonResult);
+					},
 
-                        error: function (xhr, status) {
-                            window.alert(p('oclife', 'Unable to get the tags! Ajax error.'));
-                        }
-                    })
-                },
-                minLength: 2,
-                delay: 200                                                
-          },
-          showAutocompleteOnFocus: false
-        });
-                
-        $('#oclife_allfiles_tags').data('bs.tokenfield').$input.on('autocompletefocus', function(e, ui){
-            e.preventDefault();
-            $(this).val(ui.item.label);
-        });
+					error: function (xhr, status) {
+						window.alert(p('oclife', 'Unable to get the tags! Ajax error.'));
+					}
+				})
+			},
+			minLength: 2,
+			delay: 200                                                
+	  },
+	  showAutocompleteOnFocus: false
+	});
+			
+	$('#oclife_allfiles_tags').data('bs.tokenfield').$input.on('autocompletefocus', function(e, ui){
+		e.preventDefault();
+		$(this).val(ui.item.label);
+	});
 
-        $('#oclife_selfiles_tags').data('bs.tokenfield').$input.on('autocompletefocus', function(e, ui){
-            e.preventDefault();
-            $(this).val(ui.item.label);
-        });
+	$('#oclife_selfiles_tags').data('bs.tokenfield').$input.on('autocompletefocus', function(e, ui){
+		e.preventDefault();
+		$(this).val(ui.item.label);
+	});
 
-        // Query to populate the tags
-        var fileID = (fileInfos.fileID === -1) ? getSelectedFiles('id') : parseInt(fileInfos.fileID);
+	// Query to populate the tags
+	var fileID = (fileInfos.fileID === -1) ? getSelectedFiles('id') : parseInt(fileInfos.fileID);
 
-        // Remove old event handler
-        $('#oclife_selfiles_tags').off('afterCreateToken');
-        $('#oclife_selfiles_tags').off('removeToken');
-        $('#oclife_allfiles_tags').off('afterCreateToken');
-        $('#oclife_allfiles_tags').off('removeToken');
+	// Remove old event handler
+	$('#oclife_selfiles_tags').off('afterCreateToken');
+	$('#oclife_selfiles_tags').off('removeToken');
+	$('#oclife_allfiles_tags').off('afterCreateToken');
+	$('#oclife_allfiles_tags').off('removeToken');
 
-        // Query for actual tags
-        $.ajax({
-            url: OC.filePath('oclife', 'ajax', 'getTagsForFile.php'),
-            async: false,
-            timeout: 2000,
+	// Query for actual tags
+	$.ajax({
+		url: OC.filePath('oclife', 'ajax', 'getTagsForFile.php'),
+		async: false,
+		timeout: 2000,
 
-            data: {
-                id: JSON.stringify(fileID)
-            },
+		data: {
+			id: JSON.stringify(fileID)
+		},
 
-            success: function(result) {
-                $('#oclife_allfiles_tags').tokenfield('setTokens', []);
-                $('#oclife_selfiles_tags').tokenfield('setTokens', []);
-                
-                if(fileID instanceof Array) {
-                    $('#oclife_allfiles_tags').tokenfield('setTokens', JSON.parse(result));
-                } else {
-                    $('#oclife_selfiles_tags').tokenfield('setTokens', JSON.parse(result));
-                }
-            },
+		success: function(result) {
+			$('#oclife_allfiles_tags').tokenfield('setTokens', []);
+			$('#oclife_selfiles_tags').tokenfield('setTokens', []);
+			
+			if(fileID instanceof Array) {
+				$('#oclife_allfiles_tags').tokenfield('setTokens', JSON.parse(result));
+			} else {
+				$('#oclife_selfiles_tags').tokenfield('setTokens', JSON.parse(result));
+			}
+		},
 
-            error: function (xhr, status) {
-                window.alert(p('oclife', 'Unable to get actual tags for this document! Ajax error!'));
-            },
+		error: function (xhr, status) {
+			window.alert(p('oclife', 'Unable to get actual tags for this document! Ajax error!'));
+		},
 
-            type: "POST"});
-                
-        // Install event handlers
-        $('#oclife_selfiles_tags').on('afterCreateToken', function(e) {
-            handleTagAdd(e, fileID);
-        });
+		type: "POST"});
+			
+	// Install event handlers
+	$('#oclife_selfiles_tags').on('afterCreateToken', function(e) {
+		handleTagAdd(e, fileID);
+	});
 
-        $('#oclife_selfiles_tags').on('removeToken', 
-            function (e) {
-                handleTagRemove(e, fileID);
-            }
-        );
-        
-        $('#oclife_allfiles_tags').on('afterCreateToken', function(e) {
-            handleTagAdd(e, fileID);
-        });
-        
-        $('#oclife_allfiles_tags').on('removeToken', 
-            function (e) {
-                handleTagRemove(e, fileID);
-            }
-        );
+	$('#oclife_selfiles_tags').on('removeToken', 
+		function (e) {
+			handleTagRemove(e, fileID);
+		}
+	);
+	
+	$('#oclife_allfiles_tags').on('afterCreateToken', function(e) {
+		handleTagAdd(e, fileID);
+	});
+	
+	$('#oclife_allfiles_tags').on('removeToken', 
+		function (e) {
+			handleTagRemove(e, fileID);
+		}
+	);
 }
 
 function getFileInfo(filePath) {
@@ -470,22 +470,22 @@ function getSelectedFiles(property) {
 	var elements=$('td.filename input:checkbox:checked').parent().parent();
 	var files=[];
 	elements.each(function(i,element) {
-            var file={
-                    id:$(element).attr('data-id'),
-                    name:$(element).attr('data-file'),
-                    mime:$(element).data('mime'),
-                    type:$(element).data('type'),
-                    size:$(element).data('size'),
-                    etag:$(element).data('etag')
-            };
+		var file={
+			id:$(element).attr('data-id'),
+			name:$(element).attr('data-file'),
+			mime:$(element).data('mime'),
+			type:$(element).data('type'),
+			size:$(element).data('size'),
+			etag:$(element).data('etag')
+		};
 
-            if(file.mime.indexOf('directory') === -1) {
-                if (property) {
-                        files.push(file[property]);
-                } else {
-                        files.push(file);
-                }
-            }
+		if(file.mime.indexOf('directory') === -1) {
+			if (property) {
+				files.push(file[property]);
+			} else {
+				files.push(file);
+			}
+		}
 	});
 	return files;
 }

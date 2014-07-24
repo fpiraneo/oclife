@@ -231,6 +231,17 @@ class hTags {
             return -1;
         }
 
+		// Prepare root of the three
+        $result = array(
+            0 => array(
+                'key' => '-1',
+                'title' => 'Root',
+                'expanded' => true,
+                'class' => 'r-----',
+                'children' => array()
+                )
+            );
+
         // Get all tags with no parent
         $sql = 'SELECT id FROM *PREFIX*oclife_tags WHERE parent=-1 ORDER BY id';
         $query = \OCP\DB::prepare($sql);
@@ -242,16 +253,6 @@ class hTags {
 				$ids[] = intval($row['id']);
 			}
         }
-
-        $result = array(
-            0 => array(
-                'key' => '-1',
-                'title' => 'Root',
-                'expanded' => true,
-                'class' => 'global',
-                'children' => array()
-                )
-            );
 
         foreach($ids as $id) {
             $result[0]['children'][] = $this->getTagTreeFromID($id, $tagLang);
@@ -282,7 +283,7 @@ class hTags {
 			if(OCA\OCLife\hTags::readAllowed($row['tagid']) {
 				$result['key'] = $row['tagid'];
 				$result['title'] = $row['descr'];
-				$result['class'] = $row['permission'];
+				$result['permission'] = $row['permission'];
 			}
         }
 
@@ -319,7 +320,7 @@ class hTags {
      * @param String $parent Plain language (EN, IT, FR, ...) description of parent tag - Empty string means: "Set parent as root"
      * @param String $lang Language ID (EN, IT, FR, ...) of both tag
      */
-    public function setTagParent($tag, $parent, $lang) {
+    public function setTagParent($tag, $parent, $lang='xx') {
         // Verify for right parent
         if($parent !== '') {
             $sql = 'SELECT tagid FROM *PREFIX*oclife_humanReadable WHERE lang=? AND descr=?';

@@ -35,27 +35,39 @@ $placeHolderPath = __DIR__ . '/img/noImage.png';
 
 // Build thumb path
 if(isset($filePath)) {
-	$filePathInfo = pathinfo($filePath);
-	$previewPath = \OC_User::getHome($user) . '/oclife/previews/' . $user;
-	$previewDir = $previewPath . $filePathInfo['dirname'];
-	$thumbPath = $previewPath . $filePathInfo['dirname'] . '/tmp_' . time() . '.png';
+    $filePathInfo = pathinfo($filePath);
+    $previewPath = \OC_User::getHome($user) . '/oclife/previews/' . $user;
+    $previewDir = $previewPath . $filePathInfo['dirname'];
+    $thumbPath = $previewPath . $filePathInfo['dirname'] . '/' . $filePathInfo['filename'] . '.png';
 
-	// Check and eventually prepare preview directory
-	if(!is_dir($previewDir)) {
-		mkdir($previewDir, 0755, true);
-	}
+    // Check and eventually prepare preview directory
+    if(!is_dir($previewDir)) {
+        mkdir($previewDir, 0755, true);
+    }
 
-	// Check if thumbnail exist, create it otherwise
-	$imgHandler = new \OCA\OCLife\ImageHandler();
-	$imgHandler->setHeight(800);
-	$imgHandler->setWidth(600);
-	$imgHandler->setBgColorFromValues(0, 0, 0);
+    // If preview exist check if it's newer than the file, regenate it otherwise
+    if(file_exists($thumbPath)) {
+        $thumbMTime = filemtime($thumbPath);
+        $fileInfo = \OC\Files\Filesystem::getFileInfo($filePath);
+        
+        if($thumbMTime < $fileInfo['mtime']) {
+            unlink($thumbPath);
+        }
+    }
 
-	$imgHandler->generateImageThumbnail($viewPath, $filePath, $thumbPath);
+    // Check if thumbnail exist, create it otherwise
+    if(!file_exists($thumbPath)) {
+        $imgHandler = new \OCA\OCLife\ImageHandler();
+        $imgHandler->setHeight(600);
+        $imgHandler->setWidth(800);
+        $imgHandler->setBgColorFromValues(0, 0, 0);
 
-	$previewPath = (is_file($thumbPath)) ? $thumbPath : $placeHolderPath;
+        $imgHandler->generateImageThumbnail($viewPath, $filePath, $thumbPath);
+    }
+
+    $previewPath = (is_file($thumbPath)) ? $thumbPath : $placeHolderPath;
 } else {
-	$previewPath = $placeHolderPath;
+    $previewPath = $placeHolderPath;
 }
 
 // Output the preview
@@ -71,8 +83,3 @@ header('Content-Type: ' . $mime);
 
 $fp = @fopen($previewPath, 'rb');
 @fpassthru($fp);
-
-// Remove preview file once used
-if(is_file($thumbPath)) {
-	unlink($thumbPath);
-}

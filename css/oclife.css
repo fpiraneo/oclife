@@ -22,8 +22,8 @@ div.oclife_toolbar {
 }
 
 span.oclife_header {
-    position: absolute;
-    margin: 6px 0px 0px 10px;
+    margin: 6px;
+    //position: absolute;
     font-size: 12px;
     font-weight: bold;
 }
@@ -99,4 +99,3 @@ div.oclife_tile:hover {
     width:200px; 
     height: auto;
 }
-

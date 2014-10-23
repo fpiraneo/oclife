@@ -48,17 +48,6 @@
 			
 			<field>
 				<!--
-					Group owning of the tag: default to '' (nobody)
-				-->
-				<name>group</name>
-				<type>text</type>
-				<default></default>
-				<notnull>true</notnull>
-				<length>64</length>
-			</field>			
-			
-			<field>
-				<!--
 					This field is like a unix-style permission for a file
 					in the format of rwrwrw where: first rw means read and
 					write permission for the owner, second rw for the user's

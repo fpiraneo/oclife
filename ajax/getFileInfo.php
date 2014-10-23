@@ -75,9 +75,28 @@ if($fileInfos['encrypted']) {
     $infos[] = '<strong>' . $l->t('Unencrypted size') . ': </strong>' . \OCA\OCLife\utilities::formatBytes($fileInfos['unencrypted_size'], 2, TRUE);
 }
 
-// Output the result!
+// Output basic infos
 $htmlInfos = implode('<br />', $infos);
 
-$result = array('preview' => $preview, 'infos' => $htmlInfos, 'fileid' => $fileInfos['fileid']);
+// Check for EXIF data
+// Get current user
+$user = \OCP\User::getUser();
+$viewPath = '/' . $user . '/files';
+$view = new \OC\Files\View($viewPath);
+$imageLocalPath = $view->getLocalFile($filePath);
+
+$exifHandler = new OCA\OCLife\exifHandler($imageLocalPath);
+$allInfos = $exifHandler->getExifData();
+$ifd0Infos = isset($allInfos['IFD0']) ? $allInfos['IFD0'] : array();
+$exifInfos = isset($allInfos['EXIF']) ? $allInfos['EXIF'] : array();
+
+$fullInfoArray = array_merge($ifd0Infos, $exifInfos);
+
+if(is_array($fullInfoArray)) {
+    $extInfoText = OCA\OCLife\utilities::glueArrayHTML($fullInfoArray);
+} else {
+    $extInfoText = '';
+}
+$result = array('preview' => $preview, 'infos' => $htmlInfos, 'exif' => $extInfoText, 'fileid' => $fileInfos['fileid']);
 
 print json_encode($result);

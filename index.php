@@ -23,12 +23,8 @@ OCP\App::setActiveNavigationEntry('oclife');
 
 // Include what's needed by fancytree
 \OCP\Util::addStyle('oclife', 'ui.fancytree');
-\OCP\Util::addStyle('oclife', 'jquery.contextMenu');
 
-\OCP\Util::addScript('oclife', 'fancytree/jquery.fancytree');
-\OCP\Util::addScript('oclife', 'fancytree/jquery.fancytree.dnd');
-\OCP\Util::addScript('oclife', 'fancytree/jquery.contextMenu-1.6.5');
-\OCP\Util::addScript('oclife', 'fancytree/jquery.fancytree.contextMenu');
+\OCP\Util::addScript('oclife', 'fancytree/jquery.fancytree-all');
 
 // Following is needed by layout manager
 \OCP\Util::addScript('oclife', 'layout/jquery.sizes');
@@ -45,14 +41,4 @@ OCP\App::setActiveNavigationEntry('oclife');
 \OCP\App::checkAppEnabled('oclife');
 
 $tpl = new OCP\Template("oclife", "main", "user");
-
-$onlyAdminCanEdit = intval(OCP\Config::getAppValue('oclife', 'onlyAdminCanEdit'));
-$isAdmin = OC_User::isAdminUser(OC_User::getUser());
-
-if(!$onlyAdminCanEdit || $isAdmin) {
-    $tpl->assign('canEdit', '1');
-} else {
-    $tpl->assign('canEdit', '0');
-}
-
 $tpl->printPage();

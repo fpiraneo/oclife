@@ -1,17 +1,33 @@
-/* ============================================================
- * bootstrap-tokenfield.js v0.11.0
- * ============================================================
- *
- * Copyright 2013 Sliptree
- * ============================================================ */
+/*!
+ * bootstrap-tokenfield
+ * https://github.com/sliptree/bootstrap-tokenfield
+ * Copyright 2013-2014 Sliptree and other contributors; Licensed MIT
+ */
 
-(function (root, factory) {
+(function (factory) {
   if (typeof define === 'function' && define.amd) {
+    // AMD. Register as an anonymous module.
     define(['jquery'], factory);
+  } else if (typeof exports === 'object') {
+    // For CommonJS and CommonJS-like environments where a window with jQuery
+    // is present, execute the factory with the jQuery instance from the window object
+    // For environments that do not inherently posses a window with a document
+    // (such as Node.js), expose a Tokenfield-making factory as module.exports
+    // This accentuates the need for the creation of a real window or passing in a jQuery instance
+    // e.g. require("bootstrap-tokenfield")(window); or require("bootstrap-tokenfield")($);
+    module.exports = global.window && global.window.$ ?
+      factory( global.window.$ ) :
+      function( input ) {
+        if ( !input.$ && !input.fn ) {
+          throw new Error( "Tokenfield requires a window object with jQuery or a jQuery instance" );
+        }
+        return factory( input.$ || input );
+      };
   } else {
-    root.Tokenfield = factory(root.jQuery);
+    // Browser globals
+    factory(jQuery, window);
   }
-}(this, function ($) {
+}(function ($, window) {
 
   "use strict"; // jshint ;_;
 
@@ -25,16 +41,35 @@
     this.textDirection = this.$element.css('direction');
 
     // Extend options
-    this.options = $.extend({}, $.fn.tokenfield.defaults, { tokens: this.$element.val() }, options)
-    
+    this.options = $.extend(true, {}, $.fn.tokenfield.defaults, { tokens: this.$element.val() }, this.$element.data(), options)
+
     // Setup delimiters and trigger keys
     this._delimiters = (typeof this.options.delimiter === 'string') ? [this.options.delimiter] : this.options.delimiter
     this._triggerKeys = $.map(this._delimiters, function (delimiter) {
       return delimiter.charCodeAt(0);
     });
+    this._firstDelimiter = this._delimiters[0];
+
+    // Check for whitespace, dash and special characters
+    var whitespace = $.inArray(' ', this._delimiters)
+      , dash = $.inArray('-', this._delimiters)
+
+    if (whitespace >= 0)
+      this._delimiters[whitespace] = '\\s'
+
+    if (dash >= 0) {
+      delete this._delimiters[dash]
+      this._delimiters.unshift('-')
+    }
+
+    var specialCharacters = ['\\', '$', '[', '{', '^', '.', '|', '?', '*', '+', '(', ')']
+    $.each(this._delimiters, function (index, character) {
+      var pos = $.inArray(character, specialCharacters)
+      if (pos >= 0) _self._delimiters[index] = '\\' + character;
+    });
 
     // Store original input width
-    var elRules = (typeof window.getMatchedCSSRules === 'function') ? window.getMatchedCSSRules( element ) : null
+    var elRules = (window && typeof window.getMatchedCSSRules === 'function') ? window.getMatchedCSSRules( element ) : null
       , elStyleWidth = element.style.width
       , elCSSWidth
       , elWidth = this.$element.width()
@@ -48,8 +83,16 @@
     }
 
     // Move original input out of the way
-    var hidingPosition = $('body').css('direction') === 'rtl' ? 'right' : 'left';
-    this.$element.css('position', 'absolute').css(hidingPosition, '-10000px').prop('tabindex', -1)
+    var hidingPosition = $('body').css('direction') === 'rtl' ? 'right' : 'left',
+        originalStyles = { position: this.$element.css('position') };
+    originalStyles[hidingPosition] = this.$element.css(hidingPosition);
+
+    this.$element
+      .data('original-styles', originalStyles)
+      .data('original-tabindex', this.$element.prop('tabindex'))
+      .css('position', 'absolute')
+      .css(hidingPosition, '-10000px')
+      .prop('tabindex', -1)
 
     // Create a wrapper
     this.$wrapper = $('<div class="tokenfield form-control" />')
@@ -63,6 +106,7 @@
                     .appendTo( this.$wrapper )
                     .prop( 'placeholder',  this.$element.prop('placeholder') )
                     .prop( 'id', id + '-tokenfield' )
+                    .prop( 'tabindex', this.$element.data('original-tabindex') )
 
     // Re-route original input label to new input
     var $label = $( 'label[for="' + this.$element.prop('id') + '"]' )
@@ -72,7 +116,7 @@
 
     // Set up a copy helper to handle copy & paste
     this.$copyHelper = $('<input type="text" />').css('position', 'absolute').css(hidingPosition, '-10000px').prop('tabindex', -1).prependTo( this.$wrapper )
-    
+
     // Set wrapper width
     if (elStyleWidth) {
       this.$wrapper.css('width', elStyleWidth);
@@ -90,17 +134,22 @@
       this.disable();
     }
 
+    // Set tokenfield readonly, if original input is readonly
+    if (this.$element.prop('readonly')) {
+      this.readonly();
+    }
+
     // Set up mirror for input auto-sizing
     this.$mirror = $('<span style="position:absolute; top:-999px; left:0; white-space:pre;"/>');
     this.$input.css('min-width', this.options.minWidth + 'px')
     $.each([
-        'fontFamily', 
-        'fontSize', 
-        'fontWeight', 
-        'fontStyle', 
-        'letterSpacing', 
-        'textTransform', 
-        'wordSpacing', 
+        'fontFamily',
+        'fontSize',
+        'fontWeight',
+        'fontStyle',
+        'letterSpacing',
+        'textTransform',
+        'wordSpacing',
         'textIndent'
     ], function (i, val) {
         _self.$mirror[0].style[val] = _self.$input.css(val);
@@ -113,9 +162,9 @@
 
     // Calculate inner input width
     this.update()
-    
+
     // Create initial tokens, if any
-    this.setTokens(this.options.tokens, false, false)
+    this.setTokens(this.options.tokens, false, ! this.$element.val() && this.options.tokens )
 
     // Start listening to events
     this.listen()
@@ -123,17 +172,26 @@
     // Initialize autocomplete, if necessary
     if ( ! $.isEmptyObject( this.options.autocomplete ) ) {
       var side = this.textDirection === 'rtl' ? 'right' : 'left'
-      var autocompleteOptions = $.extend({}, this.options.autocomplete, {
-        minLength: this.options.showAutocompleteOnFocus ? 0 : null,
-        position: { my: side + " top", at: side + " bottom", of: this.$wrapper }
-      })
+       ,  autocompleteOptions = $.extend({
+            minLength: this.options.showAutocompleteOnFocus ? 0 : null,
+            position: { my: side + " top", at: side + " bottom", of: this.$wrapper }
+          }, this.options.autocomplete )
+
       this.$input.autocomplete( autocompleteOptions )
     }
 
     // Initialize typeahead, if necessary
     if ( ! $.isEmptyObject( this.options.typeahead ) ) {
-      var typeaheadOptions = $.extend({}, this.options.typeahead, {})
-      this.$input.typeahead( typeaheadOptions )
+
+      var typeaheadOptions = this.options.typeahead
+        , defaults = {
+            minLength: this.options.showAutocompleteOnFocus ? 0 : null
+          }
+        , args = $.isArray( typeaheadOptions ) ? typeaheadOptions : [typeaheadOptions, typeaheadOptions]
+
+      args[0] = $.extend( {}, defaults, args[0] )
+
+      this.$input.typeahead.apply( this.$input, args )
       this.typeahead = true
     }
   }
@@ -143,131 +201,120 @@
     constructor: Tokenfield
 
   , createToken: function (attrs, triggerChange) {
+      var _self = this
+
       if (typeof attrs === 'string') {
         attrs = { value: attrs, label: attrs }
+      } else {
+        // Copy objects to prevent contamination of data sources.
+        attrs = $.extend( {}, attrs )
       }
 
-     if (typeof triggerChange === 'undefined') {
+      if (typeof triggerChange === 'undefined') {
          triggerChange = true
-     }
-      
-      var _self = this
-        , value = $.trim(attrs.value)
-        , label = attrs.label.length ? $.trim(attrs.label) : value
+      }
 
-      if (!value.length || !label.length || value.length < this.options.minLength) return
+      // Normalize label and value
+      attrs.value = $.trim(attrs.value);
+      attrs.label = attrs.label && attrs.label.length ? $.trim(attrs.label) : attrs.value
 
+      // Bail out if has no value or label, or label is too short
+      if (!attrs.value.length || !attrs.label.length || attrs.label.length <= this.options.minLength) return
+
+      // Bail out if maximum number of tokens is reached
       if (this.options.limit && this.getTokens().length >= this.options.limit) return
 
       // Allow changing token data before creating it
-      var beforeCreateEvent = $.Event('beforeCreateToken')
-      beforeCreateEvent.token = {
-        value: value,
-        label: label
-      }
-      this.$element.trigger( beforeCreateEvent )
+      var createEvent = $.Event('tokenfield:createtoken', { attrs: attrs })
+      this.$element.trigger(createEvent)
 
-      if (!beforeCreateEvent.token) return
+      // Bail out if there if attributes are empty or event was defaultPrevented
+      if (!createEvent.attrs || createEvent.isDefaultPrevented()) return
 
-      value = beforeCreateEvent.token.value
-      label = beforeCreateEvent.token.label
-
-      // Check for duplicates
-      if (!this.options.allowDuplicates && $.grep(this.getTokens(), function (token) {
-        return token.value === value
-      }).length) {
-        // Allow listening to when duplicates get prevented
-        var duplicateEvent = $.Event('preventDuplicateToken')
-        duplicateEvent.token = {
-          value: value,
-          label: label
-        }
-        this.$element.trigger( duplicateEvent )
-        // Add duplicate warning class to existing token for 250ms
-        var duplicate = this.$wrapper.find( '.token[data-value="' + value + '"]' ).addClass('duplicate')
-        setTimeout(function() {
-          duplicate.removeClass('duplicate');
-        }, 250)
-        return false
-      }      
-
-      var token = $('<div class="token" />')
-            .attr('data-value', value)
+      var $token = $('<div class="token" />')
             .append('<span class="token-label" />')
             .append('<a href="#" class="close" tabindex="-1">&times;</a>')
+            .data('attrs', attrs)
 
       // Insert token into HTML
-      if (this.$input.hasClass('tt-query')) {
-        this.$input.parent().before( token )
+      if (this.$input.hasClass('tt-input')) {
+        // If the input has typeahead enabled, insert token before it's parent
+        this.$input.parent().before( $token )
       } else {
-        this.$input.before( token )
+        this.$input.before( $token )
       }
+
+      // Temporarily set input width to minimum
       this.$input.css('width', this.options.minWidth + 'px')
 
-      var tokenLabel = token.find('.token-label')
-        , closeButton = token.find('.close')
+      var $tokenLabel = $token.find('.token-label')
+        , $closeButton = $token.find('.close')
 
       // Determine maximum possible token label width
       if (!this.maxTokenWidth) {
         this.maxTokenWidth =
-          this.$wrapper.width() - closeButton.outerWidth() - 
-          parseInt(closeButton.css('margin-left'), 10) -
-          parseInt(closeButton.css('margin-right'), 10) -
-          parseInt(token.css('border-left-width'), 10) -
-          parseInt(token.css('border-right-width'), 10) -
-          parseInt(token.css('padding-left'), 10) -
-          parseInt(token.css('padding-right'), 10)
-          parseInt(tokenLabel.css('border-left-width'), 10) -
-          parseInt(tokenLabel.css('border-right-width'), 10) -
-          parseInt(tokenLabel.css('padding-left'), 10) -
-          parseInt(tokenLabel.css('padding-right'), 10)
-          parseInt(tokenLabel.css('margin-left'), 10) -
-          parseInt(tokenLabel.css('margin-right'), 10)
+          this.$wrapper.width() - $closeButton.outerWidth() -
+          parseInt($closeButton.css('margin-left'), 10) -
+          parseInt($closeButton.css('margin-right'), 10) -
+          parseInt($token.css('border-left-width'), 10) -
+          parseInt($token.css('border-right-width'), 10) -
+          parseInt($token.css('padding-left'), 10) -
+          parseInt($token.css('padding-right'), 10)
+          parseInt($tokenLabel.css('border-left-width'), 10) -
+          parseInt($tokenLabel.css('border-right-width'), 10) -
+          parseInt($tokenLabel.css('padding-left'), 10) -
+          parseInt($tokenLabel.css('padding-right'), 10)
+          parseInt($tokenLabel.css('margin-left'), 10) -
+          parseInt($tokenLabel.css('margin-right'), 10)
       }
 
-      tokenLabel
-        .text(label)
+      $tokenLabel
+        .text(attrs.label)
         .css('max-width', this.maxTokenWidth)
 
-      // Listen to events
-      token
+      // Listen to events on token
+      $token
         .on('mousedown',  function (e) {
-          if (_self.disabled) return false;
+          if (_self._disabled || _self._readonly) return false
           _self.preventDeactivation = true
         })
         .on('click',    function (e) {
-          if (_self.disabled) return false;
+          if (_self._disabled || _self._readonly) return false
           _self.preventDeactivation = false
 
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault()
-            return _self.toggle( token )
+            return _self.toggle( $token )
           }
-          
-          _self.activate( token, e.shiftKey, e.shiftKey )          
+
+          _self.activate( $token, e.shiftKey, e.shiftKey )
         })
         .on('dblclick', function (e) {
-          if (_self.disabled || !_self.options.allowEditing ) return false;
-          _self.edit( token )
+          if (_self._disabled || _self._readonly || !_self.options.allowEditing ) return false
+          _self.edit( $token )
         })
 
-      closeButton
+      $closeButton
           .on('click',  $.proxy(this.remove, this))
 
-      var afterCreateEvent = $.Event('afterCreateToken')
-      afterCreateEvent.token = beforeCreateEvent.token
-      afterCreateEvent.relatedTarget = token.get(0)
-      this.$element.trigger( afterCreateEvent )
+      // Trigger createdtoken event on the original field
+      // indicating that the token is now in the DOM
+      this.$element.trigger($.Event('tokenfield:createdtoken', {
+        attrs: attrs,
+        relatedTarget: $token.get(0)
+      }))
 
-      var changeEvent = $.Event('change')
-      changeEvent.initiator = 'tokenfield'
+      // Trigger change event on the original field
       if (triggerChange) {
-        this.$element.val( this.getTokensList() ).trigger( changeEvent )
+        this.$element.val( this.getTokensList() ).trigger( $.Event('change', { initiator: 'tokenfield' }) )
       }
+
+      // Update tokenfield dimensions
       this.update()
 
-      return this.$input.get(0)
-    }    
+      // Return original element
+      return this.$element.get(0)
+    }
 
   , setTokens: function (tokens, add, triggerChange) {
       if (!tokens) return
@@ -280,6 +327,7 @@
 
       if (typeof tokens === 'string') {
         if (this._delimiters.length) {
+          // Split based on delimiters
           tokens = tokens.split( new RegExp( '[' + this._delimiters.join('') + ']' ) )
         } else {
           tokens = [tokens];
@@ -287,20 +335,17 @@
       }
 
       var _self = this
-      $.each(tokens, function (i, token) {
-        _self.createToken(token, triggerChange)
+      $.each(tokens, function (i, attrs) {
+        _self.createToken(attrs, triggerChange)
       })
 
       return this.$element.get(0)
     }
 
-  , getTokenData: function(token) {
-      var data = token.map(function() {
+  , getTokenData: function($token) {
+      var data = $token.map(function() {
         var $token = $(this);
-        return {
-          value: $token.attr('data-value') || $token.find('.token-label').text(),
-          label: $token.find('.token-label').text()
-        }
+        return $token.data('attrs')
       }).get();
 
       if (data.length == 1) {
@@ -321,9 +366,9 @@
   }
 
   , getTokensList: function(delimiter, beautify, active) {
-      delimiter = delimiter || this._delimiters[0]
+      delimiter = delimiter || this._firstDelimiter
       beautify = ( typeof beautify !== 'undefined' && beautify !== null ) ? beautify : this.options.beautify
-      
+
       var separator = delimiter + ( beautify && delimiter !== ' ' ? ' ' : '')
       return $.map( this.getTokens(active), function (token) {
         return token.value
@@ -353,7 +398,7 @@
 
       this.$copyHelper
         .on('focus',    $.proxy(this.focus, this))
-        .on('blur',     $.proxy(this.blur, this))        
+        .on('blur',     $.proxy(this.blur, this))
         .on('keydown',  $.proxy(this.keydown, this))
         .on('keyup',    $.proxy(this.keyup, this))
 
@@ -366,7 +411,7 @@
         .on('autocompletecreate', function() {
           // Set minimum autocomplete menu width
           var $_menuElement = $(this).data('ui-autocomplete').menu.element
-          
+
           var minWidth = _self.$wrapper.outerWidth() -
               parseInt( $_menuElement.css('border-left-width'), 10 ) -
               parseInt( $_menuElement.css('border-right-width'), 10 )
@@ -382,29 +427,13 @@
           }
           return false
         })
-        .on('typeahead:selected', function (e, datum, dataset) {
-          var valueKey = 'value'
-
-          // Get the actual valueKey for this dataset
-          $.each(_self.$input.data('ttView').datasets, function (i, set) {
-            if (set.name === dataset) {
-              valueKey = set.valueKey
-            }
-          })
-
+        .on('typeahead:selected typeahead:autocompleted', function (e, datum, dataset) {
           // Create token
-          if (_self.createToken( datum[valueKey] )) {
-            _self.$input.typeahead('setQuery', '')
+          if (_self.createToken( datum )) {
+            _self.$input.typeahead('val', '')
             if (_self.$input.data( 'edit' )) {
               _self.unedit(true)
             }
-          }
-        })
-        .on('typeahead:autocompleted', function (e, datum, dataset) {
-          _self.createToken( _self.$input.val() )
-          _self.$input.typeahead('setQuery', '')
-          if (_self.$input.data( 'edit' )) {
-            _self.unedit(true)
           }
         })
 
@@ -439,7 +468,7 @@
 
         case 40: // down arrow
           upDown('next')
-          break        
+          break
 
         case 65: // a (to handle ctrl + a)
           if (this.$input.val().length > 0 || !(e.ctrlKey || e.metaKey)) break
@@ -448,15 +477,15 @@
           break
 
         case 9: // tab
-        case 13: // enter     
+        case 13: // enter
 
           // We will handle creating tokens from autocomplete in autocomplete events
           if (this.$input.data('ui-autocomplete') && this.$input.data('ui-autocomplete').menu.element.find("li:has(a.ui-state-focus)").length) break
-          
+
           // We will handle creating tokens from typeahead in typeahead events
-          if (this.$input.hasClass('tt-query') && this.$wrapper.find('.tt-is-under-cursor').length ) break
-          if (this.$input.hasClass('tt-query') && this.$wrapper.find('.tt-hint').val().length) break
-          
+          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-cursor').length ) break
+          if (this.$input.hasClass('tt-input') && this.$wrapper.find('.tt-hint').val().length) break
+
           // Create token
           if (this.$input.is(document.activeElement) && this.$input.val().length || this.$input.data('edit')) {
             return this.createTokensFromInput(e, this.$input.data('edit'));
@@ -475,13 +504,13 @@
           if (_self.$input.val().length > 0) return
 
           direction += 'All'
-          var token = _self.$input.hasClass('tt-query') ? _self.$input.parent()[direction]('.token:first') : _self.$input[direction]('.token:first')
-          if (!token.length) return
+          var $token = _self.$input.hasClass('tt-input') ? _self.$input.parent()[direction]('.token:first') : _self.$input[direction]('.token:first')
+          if (!$token.length) return
 
           _self.preventInputFocus = true
           _self.preventDeactivation = true
 
-          _self.activate( token )
+          _self.activate( $token )
           e.preventDefault()
 
         } else {
@@ -496,10 +525,10 @@
         if (_self.$input.is(document.activeElement)) {
           if (_self.$input.val().length > 0) return
 
-          var token = _self.$input.hasClass('tt-query') ? _self.$input.parent()[direction + 'All']('.token:first') : _self.$input[direction + 'All']('.token:first')
-          if (!token.length) return
+          var $token = _self.$input.hasClass('tt-input') ? _self.$input.parent()[direction + 'All']('.token:first') : _self.$input[direction + 'All']('.token:first')
+          if (!$token.length) return
 
-          _self.activate( token )
+          _self.activate( $token )
         }
 
         var opposite = direction === 'prev' ? 'next' : 'prev'
@@ -538,13 +567,13 @@
         case 8: // backspace
           if (this.$input.is(document.activeElement)) {
             if (this.$input.val().length || this.lastInputValue.length && this.lastKeyDown === 8) break
-            
+
             this.preventDeactivation = true
-            var prev = this.$input.hasClass('tt-query') ? this.$input.parent().prevAll('.token:first') : this.$input.prevAll('.token:first')
+            var $prevToken = this.$input.hasClass('tt-input') ? this.$input.parent().prevAll('.token:first') : this.$input.prevAll('.token:first')
 
-            if (!prev.length) break
+            if (!$prevToken.length) break
 
-            this.activate( prev )
+            this.activate( $prevToken )
           } else {
             this.remove(e)
           }
@@ -563,7 +592,7 @@
 
       if (this.$input.is(document.activeElement)) {
         this.$wrapper.find('.active').removeClass('active')
-        this.firstActiveToken = null
+        this.$firstActiveToken = null
 
         if (this.options.showAutocompleteOnFocus) {
           this.search()
@@ -578,29 +607,31 @@
 
       if (!this.preventDeactivation && !this.$element.is(document.activeElement)) {
         this.$wrapper.find('.active').removeClass('active')
-        this.firstActiveToken = null
+        this.$firstActiveToken = null
       }
 
       if (!this.preventCreateTokens && (this.$input.data('edit') && !this.$input.is(document.activeElement) || this.options.createTokensOnBlur )) {
-        this.createTokensFromInput(e) 
+        this.createTokensFromInput(e)
       }
-      
+
       this.preventDeactivation = false
       this.preventCreateTokens = false
     }
 
   , paste: function (e) {
       var _self = this
-      
+
       // Add tokens to existing ones
-      setTimeout(function () {
-        _self.createTokensFromInput(e)
-      }, 1)
+      if (_self.options.allowPasting) {
+        setTimeout(function () {
+          _self.createTokensFromInput(e)
+        }, 1)
+      }
     }
 
   , change: function (e) {
       if ( e.initiator === 'tokenfield' ) return // Prevent loops
-      
+
       this.setTokens( this.$element.val() )
     }
 
@@ -610,14 +641,14 @@
 
       var tokensBefore = this.getTokensList()
       this.setTokens( this.$input.val(), true )
-      
+
       if (tokensBefore == this.getTokensList() && this.$input.val().length)
         return false // No tokens were added, do nothing (prevent form submit)
 
-      if (this.$input.hasClass('tt-query')) {
+      if (this.$input.hasClass('tt-input')) {
         // Typeahead acts weird when simply setting input value to empty,
         // so we set the query to empty instead
-        this.$input.typeahead('setQuery', '')
+        this.$input.typeahead('val', '')
       } else {
         this.$input.val('')
       }
@@ -627,56 +658,54 @@
       }
 
       return false // Prevent form being submitted
-    }  
+    }
 
   , next: function (add) {
       if (add) {
-        var firstActive = this.$wrapper.find('.active:first')
-          , deactivate = firstActive && this.firstActiveToken ? firstActive.index() < this.firstActiveToken.index() : false
+        var $firstActiveToken = this.$wrapper.find('.active:first')
+          , deactivate = $firstActiveToken && this.$firstActiveToken ? $firstActiveToken.index() < this.$firstActiveToken.index() : false
 
-        if (deactivate) return this.deactivate( firstActive )
+        if (deactivate) return this.deactivate( $firstActiveToken )
       }
 
-      var active = this.$wrapper.find('.active:last')
-        , next = active.nextAll('.token:first')
+      var $lastActiveToken = this.$wrapper.find('.active:last')
+        , $nextToken = $lastActiveToken.nextAll('.token:first')
 
-      if (!next.length) {
+      if (!$nextToken.length) {
         this.$input.focus()
         return
       }
 
-      this.activate(next, add)
+      this.activate($nextToken, add)
     }
 
   , prev: function (add) {
 
       if (add) {
-        var lastActive = this.$wrapper.find('.active:last')
-          , deactivate = lastActive && this.firstActiveToken ? lastActive.index() > this.firstActiveToken.index() : false
+        var $lastActiveToken = this.$wrapper.find('.active:last')
+          , deactivate = $lastActiveToken && this.$firstActiveToken ? $lastActiveToken.index() > this.$firstActiveToken.index() : false
 
-        if (deactivate) return this.deactivate( lastActive )
+        if (deactivate) return this.deactivate( $lastActiveToken )
       }
 
-      var active = this.$wrapper.find('.active:first')
-        , prev = active.prevAll('.token:first')
+      var $firstActiveToken = this.$wrapper.find('.active:first')
+        , $prevToken = $firstActiveToken.prevAll('.token:first')
 
-      if (!prev.length) {
-        prev = this.$wrapper.find('.token:first')
+      if (!$prevToken.length) {
+        $prevToken = this.$wrapper.find('.token:first')
       }
 
-      if (!prev.length && !add) {
+      if (!$prevToken.length && !add) {
         this.$input.focus()
         return
       }
 
-      this.activate( prev, add )
+      this.activate( $prevToken, add )
     }
 
-  , activate: function (token, add, multi, remember) {
+  , activate: function ($token, add, multi, remember) {
 
-      if (!token) return
-
-      if (this.$wrapper.find('.token.active').length === this.$wrapper.find('.token').length) return
+      if (!$token) return
 
       if (typeof remember === 'undefined') var remember = true
 
@@ -687,17 +716,17 @@
       if (!add) {
         this.$wrapper.find('.active').removeClass('active')
         if (remember) {
-          this.firstActiveToken = token 
+          this.$firstActiveToken = $token
         } else {
-          delete this.firstActiveToken
+          delete this.$firstActiveToken
         }
       }
 
-      if (multi && this.firstActiveToken) {
+      if (multi && this.$firstActiveToken) {
         // Determine first active token and the current tokens indicies
         // Account for the 1 hidden textarea by subtracting 1 from both
-        var i = this.firstActiveToken.index() - 2
-          , a = token.index() - 2
+        var i = this.$firstActiveToken.index() - 2
+          , a = $token.index() - 2
           , _self = this
 
         this.$wrapper.find('.token').slice( Math.min(i, a) + 1, Math.max(i, a) ).each( function() {
@@ -705,7 +734,7 @@
         })
       }
 
-      token.addClass('active')
+      $token.addClass('active')
       this.$copyHelper.val( this.getTokensList( null, null, true ) ).select()
     }
 
@@ -717,64 +746,63 @@
       })
     }
 
-  , deactivate: function(token) {
-      if (!token) return
+  , deactivate: function($token) {
+      if (!$token) return
 
-      token.removeClass('active')
+      $token.removeClass('active')
       this.$copyHelper.val( this.getTokensList( null, null, true ) ).select()
     }
 
-  , toggle: function(token) {
-      if (!token) return
+  , toggle: function($token) {
+      if (!$token) return
 
-      token.toggleClass('active')
+      $token.toggleClass('active')
       this.$copyHelper.val( this.getTokensList( null, null, true ) ).select()
     }
 
-  , edit: function (token) {
-      if (!token) return
+  , edit: function ($token) {
+      if (!$token) return
 
-      var value = token.data('value')
-        , label = token.find('.token-label').text()
+      var attrs = $token.data('attrs')
 
       // Allow changing input value before editing
-      var beforeEditEvent = $.Event('beforeEditToken')
-      beforeEditEvent.token = {
-        value: value,
-        label: label
-      }
-      beforeEditEvent.relatedTarget = token.get(0)
-      this.$element.trigger( beforeEditEvent )
-      
-      if (!beforeEditEvent.token) return
+      var options = { attrs: attrs, relatedTarget: $token.get(0) }
+      var editEvent = $.Event('tokenfield:edittoken', options)
+      this.$element.trigger( editEvent )
 
-      value = beforeEditEvent.token.value
-      label = beforeEditEvent.token.label
+      // Edit event can be cancelled if default is prevented
+      if (editEvent.isDefaultPrevented()) return
 
-      token.find('.token-label').text(value)
-      var tokenWidth = token.outerWidth()
+      $token.find('.token-label').text(attrs.value)
+      var tokenWidth = $token.outerWidth()
 
-      var $_input = this.$input.hasClass('tt-query') ? this.$input.parent() : this.$input
+      var $_input = this.$input.hasClass('tt-input') ? this.$input.parent() : this.$input
 
-      token.replaceWith( $_input )
+      $token.replaceWith( $_input )
 
       this.preventCreateTokens = true
 
-      this.$input.val( value )
+      this.$input.val( attrs.value )
                 .select()
                 .data( 'edit', true )
                 .width( tokenWidth )
+
+      this.update();
+
+      // Indicate that token is now being edited, and is replaced with an input field in the DOM
+      this.$element.trigger($.Event('tokenfield:editedtoken', options ))
     }
 
   , unedit: function (focus) {
-      var $_input = this.$input.hasClass('tt-query') ? this.$input.parent() : this.$input
+      var $_input = this.$input.hasClass('tt-input') ? this.$input.parent() : this.$input
       $_input.appendTo( this.$wrapper )
-      
+
       this.$input.data('edit', false)
+      this.$mirror.text('')
 
       this.update()
 
-      // Because moving the input element around in DOM 
+      // Because moving the input element around in DOM
       // will cause it to lose focus, we provide an option
       // to re-focus the input after appending it to the wrapper
       if (focus) {
@@ -786,31 +814,35 @@
     }
 
   , remove: function (e, direction) {
-      if (this.$input.is(document.activeElement) || this.disabled) return
+      if (this.$input.is(document.activeElement) || this._disabled || this._readonly) return
 
-      var token = (e.type === 'click') ? $(e.target).closest('.token') : this.$wrapper.find('.token.active')
-      
+      var $token = (e.type === 'click') ? $(e.target).closest('.token') : this.$wrapper.find('.token.active')
+
       if (e.type !== 'click') {
         if (!direction) var direction = 'prev'
         this[direction]()
 
-        // Was this the first token?
-        if (direction === 'prev') var firstToken = token.first().prevAll('.token:first').length === 0
+        // Was it the first token?
+        if (direction === 'prev') var firstToken = $token.first().prevAll('.token:first').length === 0
       }
 
-      // Prepare events
+      // Prepare events and their options
+      var options = { attrs: this.getTokenData( $token ), relatedTarget: $token.get(0) }
+        , removeEvent = $.Event('tokenfield:removetoken', options)
 
-      var removeEvent = $.Event('removeToken')
-      removeEvent.token = this.getTokenData( token )
+      this.$element.trigger(removeEvent);
 
-      var changeEvent = $.Event('change')
-      changeEvent.initiator = 'tokenfield'
+      // Remove event can be intercepted and cancelled
+      if (removeEvent.isDefaultPrevented()) return
+
+      var removedEvent = $.Event('tokenfield:removedtoken', options)
+        , changeEvent = $.Event('change', { initiator: 'tokenfield' })
 
       // Remove token from DOM
-      token.remove()
+      $token.remove()
 
       // Trigger events
-      this.$element.val( this.getTokensList() ).trigger( removeEvent ).trigger( changeEvent )
+      this.$element.val( this.getTokensList() ).trigger( removedEvent ).trigger( changeEvent )
 
       // Focus, when necessary:
       // When there are no more tokens, or if this was the first token
@@ -821,15 +853,19 @@
       this.$input.css('width', this.options.minWidth + 'px')
       this.update()
 
+      // Cancel original event handlers
       e.preventDefault()
       e.stopPropagation()
     }
 
+    /**
+     * Update tokenfield dimensions
+     */
   , update: function (e) {
       var value = this.$input.val()
-        , inputLeftPadding = parseInt(this.$input.css('padding-left'), 10)
-        , inputRightPadding = parseInt(this.$input.css('padding-right'), 10)
-        , inputPadding = inputLeftPadding + inputRightPadding;
+        , inputPaddingLeft = parseInt(this.$input.css('padding-left'), 10)
+        , inputPaddingRight = parseInt(this.$input.css('padding-right'), 10)
+        , inputPadding = inputPaddingLeft + inputPaddingRight
 
       if (this.$input.data('edit')) {
 
@@ -839,7 +875,7 @@
         if (value === this.$mirror.text()) return
 
         this.$mirror.text(value)
-        
+
         var mirrorWidth = this.$mirror.width() + 10;
         if ( mirrorWidth > this.$wrapper.width() ) {
           return this.$input.width( this.$wrapper.width() )
@@ -848,16 +884,19 @@
         this.$input.width( mirrorWidth )
       }
       else {
-        this.$input.css( 'width', this.options.minWidth + 'px' )
-        if (this.textDirection === 'rtl') {
-          return this.$input.width( this.$input.offset().left + this.$input.outerWidth() - this.$wrapper.offset().left - parseInt(this.$wrapper.css('padding-left'), 10) - inputPadding - 1 )
-        }
-        this.$input.width( this.$wrapper.offset().left + this.$wrapper.width() + parseInt(this.$wrapper.css('padding-left'), 10) - this.$input.offset().left - inputPadding )
+        var w = (this.textDirection === 'rtl')
+              ? this.$input.offset().left + this.$input.outerWidth() - this.$wrapper.offset().left - parseInt(this.$wrapper.css('padding-left'), 10) - inputPadding - 1
+              : this.$wrapper.offset().left + this.$wrapper.width() + parseInt(this.$wrapper.css('padding-left'), 10) - this.$input.offset().left - inputPadding;
+        //
+        // some usecases pre-render widget before attaching to DOM,
+        // dimensions returned by jquery will be NaN -> we default to 100%
+        // so placeholder won't be cut off.
+        isNaN(w) ? this.$input.width('100%') : this.$input.width(w);
       }
     }
 
   , focusInput: function (e) {
-      if ($(e.target).closest('.token').length || $(e.target).closest('.token-input').length) return
+      if ( $(e.target).closest('.token').length || $(e.target).closest('.token-input').length || $(e.target).closest('.tt-dropdown-menu').length ) return
       // Focus only after the current call stack has cleared,
       // otherwise has no effect.
       // Reason: mousedown is too early - input will lose focus
@@ -876,18 +915,58 @@
     }
 
   , disable: function () {
-      this.disabled = true;
-      this.$input.prop('disabled', true);
-      this.$element.prop('disabled', true);
-      this.$wrapper.addClass('disabled');
+      this.setProperty('disabled', true);
     }
 
   , enable: function () {
-      this.disabled = false;
-      this.$input.prop('disabled', false);
-      this.$element.prop('disabled', false);
-      this.$wrapper.removeClass('disabled');
+      this.setProperty('disabled', false);
     }
+
+  , readonly: function () {
+      this.setProperty('readonly', true);
+    }
+
+  , writeable: function () {
+      this.setProperty('readonly', false);
+    }
+
+  , setProperty: function(property, value) {
+      this['_' + property] = value;
+      this.$input.prop(property, value);
+      this.$element.prop(property, value);
+      this.$wrapper[ value ? 'addClass' : 'removeClass' ](property);
+  }
+
+  , destroy: function() {
+      // Set field value
+      this.$element.val( this.getTokensList() );
+      // Restore styles and properties
+      this.$element.css( this.$element.data('original-styles') );
+      this.$element.prop( 'tabindex', this.$element.data('original-tabindex') );
+
+      // Re-route tokenfield label to original input
+      var $label = $( 'label[for="' + this.$input.prop('id') + '"]' )
+      if ( $label.length ) {
+        $label.prop( 'for', this.$element.prop('id') )
+      }
+
+      // Move original element outside of tokenfield wrapper
+      this.$element.insertBefore( this.$wrapper );
+
+      // Remove tokenfield-related data
+      this.$element.removeData('original-styles')
+                   .removeData('original-tabindex')
+                   .removeData('bs.tokenfield');
+
+      // Remove tokenfield from DOM
+      this.$wrapper.remove();
+      this.$mirror.remove();
+
+      var $_element = this.$element;
+      delete this;
+
+      return $_element;
+  }
 
   }
 
@@ -900,7 +979,7 @@
   $.fn.tokenfield = function (option, param) {
     var value
       , args = []
-    
+
     Array.prototype.push.apply( args, arguments );
 
     var elements = this.each(function () {
@@ -912,7 +991,10 @@
         args.shift()
         value = data[option].apply(data, args)
       } else {
-        if (!data) $this.data('bs.tokenfield', (data = new Tokenfield(this, options)))
+        if (!data && typeof option !== 'string' && !param) {
+          $this.data('bs.tokenfield', (data = new Tokenfield(this, options)))
+          $this.trigger('tokenfield:initialize')
+        }
       }
     })
 
@@ -922,8 +1004,8 @@
   $.fn.tokenfield.defaults = {
     minWidth: 60,
     minLength: 0,
-    allowDuplicates: false,
     allowEditing: true,
+    allowPasting: true,
     limit: 0,
     autocomplete: {},
     typeahead: {},

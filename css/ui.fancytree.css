@@ -81,7 +81,7 @@ span.fancytree-drag-helper-img,
   vertical-align: top;
   background-repeat: no-repeat;
   background-position: left;
-  background-image: url("%webroot%/apps/oclife/img/fancytree/icons.gif");
+  background-image: url("../img/fancytree/icons.gif");
   background-position: 0px 0px;
 }
 /* Used by iconclass option */
@@ -164,7 +164,7 @@ span.fancytree-expander {
   background-position: -48px -96px;
 }
 .fancytree-loading span.fancytree-expander {
-  background-image: url("%webroot%/apps/oclife/img/fancytree/loading.gif");
+  background-image: url("../img/fancytree/loading.gif");
   background-position: 0px 0px;
 }
 /*------------------------------------------------------------------------------
@@ -263,7 +263,7 @@ span.fancytree-icon {
 }
 /* Status node icons */
 .fancytree-statusnode-wait span.fancytree-icon {
-  background-image: url("%webroot%/apps/oclife/img/fancytree/loading.gif");
+  background-image: url("../img/fancytree/loading.gif");
 }
 .fancytree-statusnode-error span.fancytree-icon {
   background-position: 0px -112px;

@@ -39,13 +39,23 @@ if(substr($filePath, -1) === '/') {
     // Build thumb path
     if(isset($filePath)) {
         $filePathInfo = pathinfo($filePath);
-        $previewPath = \OC_User::getHome($user) . '/oclife/previews/' . $user;
-        $previewDir = $previewPath . $filePathInfo['dirname'];
-        $thumbPath = $previewPath . $filePathInfo['dirname'] . '/' . $filePathInfo['filename'] . '.png';
+        $previewPath = \OC_User::getHome($user) . '/oclife/thumbnails/' . $user;
+        $previewDir = $previewPath . (($filePathInfo['dirname'] === '.') ? '' : $filePathInfo['dirname']);    // OC7 FIX
+        $thumbPath = $previewDir . '/' . $filePathInfo['filename'] . '.png';
 
         // Check and eventually prepare preview directory
         if(!is_dir($previewDir)) {
             mkdir($previewDir, 0755, true);
+        }
+
+        // If preview exist check if it's newer than the file, regenate it otherwise
+        if(file_exists($thumbPath)) {
+            $thumbMTime = filemtime($thumbPath);
+            $fileInfo = \OC\Files\Filesystem::getFileInfo($filePath);
+
+            if($thumbMTime < $fileInfo['mtime']) {
+                unlink($thumbPath);
+            }
         }
 
         // Check if thumbnail exist, create it otherwise

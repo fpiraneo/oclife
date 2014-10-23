@@ -24,7 +24,7 @@
  * @author fpiraneo
  */
 
-namespace \OCA\OCLife;
+namespace OCA\OCLife;
 
 class exifHandler {
     private $imagePath;
@@ -41,7 +41,7 @@ class exifHandler {
         if(is_readable($this->imagePath)) {       
             $this->exifData = exif_read_data($this->imagePath, 0, true);
         } else {
-            throw new Exception('Provided path is not accessible - Check permissions');
+            throw new \Exception('Provided path is not accessible - Check permissions');
         }
     }
 

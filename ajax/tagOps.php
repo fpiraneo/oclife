@@ -23,14 +23,13 @@
 
 // Check for a valid operation to perform
 $tagOp = filter_input(INPUT_POST, 'tagOp', FILTER_SANITIZE_STRING);
-$validOps = array('new', 'rename', 'delete');
+$validOps = array('new', 'rename', 'delete', 'info');
 
 if(array_search($tagOp, $validOps) === FALSE) {
     $result = array(
         'result' => 'KO',
         'title' => '',
-        'key' => '',
-        'class' => ''
+        'key' => ''
     );
     
     die(json_encode($result));
@@ -41,40 +40,73 @@ $parentID = intval(filter_input(INPUT_POST, 'parentID', FILTER_SANITIZE_NUMBER_I
 $tagID = filter_input(INPUT_POST, 'tagID', FILTER_SANITIZE_NUMBER_INT);
 $tagName = filter_input(INPUT_POST, 'tagName', FILTER_SANITIZE_STRING);
 $tagLang = filter_input(INPUT_POST, 'tagLang', FILTER_SANITIZE_STRING);
+
 if($parentID === FALSE || $tagName === FALSE || strlen($tagLang) === 0 || strlen($tagLang) > 2) {
     $result = array(
         'result' => 'KO',
         'title' => '',
-        'key' => '',
-        'class' => ''
+        'key' => ''
     );
     
     die(json_encode($result));
 }
 
-// Switch between possible operations
+// For write operations check if tag can be written
+if($tagOp == 'rename' || $tagOp == 'delete') {
+	if(!\OCA\OCLife\hTags::writeAllowed($tagID)) {
+		$result = array(
+			'result' => 'NOTALLOWED',
+			'title' => '',
+			'key' => $tagID
+		);
+
+		die(json_encode($result));
+	}
+}
+
+// Tag handler instance
 $ctags = new \OCA\OCLife\hTags();
 
+// Switch between possible operations
 switch($tagOp) {
     case 'new': {
-        $result = $ctags->newTag($tagLang, $tagName, $parentID);
+        $tagID = $ctags->newTag($tagLang, $tagName, $parentID);
+        $permission = $ctags->getTagPermission($tagID);
+        $result = TRUE;
         
         break;
     }
     
     case 'rename': {
         $tagData = array($tagLang => $tagName);
-        $ctags->alterTag($tagID, $tagData);
-        $result = $tagID;
+        $result = $ctags->alterTag($tagID, $tagData);
+        $permission = $ctags->getTagPermission($tagID);
         
         break;
     }
     
     case 'delete': {
         $result = $ctags->deleteTagAndChilds(intval($tagID));
+        $permission = '';
+        $owner = '';
         
         break;
     }
+    
+    case 'info': {
+        $tagData = $ctags->getTagData($tagID);
+
+        if($tagData !== FALSE) {
+            $tagName = $tagData['title'];
+            $owner = $ctags->getTagOwner($tagID);
+            $permission = $ctags->getTagPermission($tagID);
+            $result = TRUE;
+        } else {
+            $result = FALSE;
+        }
+        
+        break;
+    }    
 }
 
 // Publish the op result
@@ -82,15 +114,15 @@ if($result === FALSE) {
     $result = array(
         'result' => 'KO',
         'title' => '',
-        'key' => '',
-        'class' => ''
+        'key' => ''
     );
 } else {
     $result = array(
         'result' => 'OK',
         'title' => $tagName,
-        'key' => $result,
-        'class' => 'global'
+        'key' => $tagID,
+        'owner' => $owner,
+        'permission' => $permission
     );
 }
 

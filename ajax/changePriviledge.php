@@ -23,21 +23,42 @@
 
 $tagID = filter_input(INPUT_POST, 'tagID', FILTER_SANITIZE_NUMBER_INT);
 $priviledge = filter_input(INPUT_POST, 'setPriviledge', FILTER_SANITIZE_STRING);
+$tagOwnerToSet = filter_input(INPUT_POST, 'tagOwner', FILTER_SANITIZE_STRING);
 
-if($tagID === FALSE || $priviledge === FALSE) {
-    die('KO');
+// At least tagID and the priviledge or the owner has to be set to perform a valid operation
+if(!isset($tagID) || (!isset($priviledge) && !isset($tagOwnerToSet))) {
+    $result = json_encode(array('result'=>'KO'));
+    die($result);
 }
 
+// If we have to perform an owner change and we're not admin then forfait
+// NOTE: Disabling the owner menu from javascript is fine but we need a function
+// to check if logged user is an admin
+if(isset($tagOwnerToSet) && !OC_User::isAdminUser(OC_User::getUser())) {
+    $result = json_encode(array('result'=>'NOTALLOWED', 'newpriviledges' => '', 'newowner' => ''));
+    die($result);
+}
+
+// Perform the requested operation
 $ctags = new \OCA\OCLife\hTags();
 
 $user = \OCP\User::getUser();
-$tagOwner = $ctags->tagOwner($tagid);
+$tagOwner = $ctags->getTagOwner($tagID);
 
-if($ctags->writeAllowed($tagid, $user) || $user === $tagOwner) {
-	$ctags->setTagPermission($tagID, $priviledge);
+if($ctags->writeAllowed($tagID, $user) || $user === $tagOwner) {
+    if(isset($priviledge)) {
+        // Set priviledges
+        $newPriviledges = $ctags->setTagPermission($tagID, $priviledge);
+        $newOwner = '';
+    } else {
+        // Set owner
+        $newOwner = $ctags->setTagOwner($tagID, $tagOwnerToSet);
+        $newPriviledges = '';
+    }
 
-	echo 'OK';
+    $result = json_encode(array('result'=>'OK', 'newpriviledges' => $newPriviledges, 'newowner' => $newOwner));    
 } else {
-	echo 'NOTALLOWED';
+    $result = json_encode(array('result'=>'NOTALLOWED', 'newpriviledges' => '', 'newowner' => ''));
 }
 
+echo $result;

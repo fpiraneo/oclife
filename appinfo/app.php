@@ -44,15 +44,14 @@ $l = new \OC_L10N('oclife');
 
 // Add what's needed by TagManager
 \OCP\Util::addStyle('oclife', 'bootstrap-tokenfield');
-\OCP\Util::addStyle('oclife', 'pygments-manni');
-\OCP\Util::addStyle('oclife', 'docs');
 \OCP\Util::addStyle('oclife', 'oclife_fileInfo');
 
 \OCP\Util::addScript('oclife', 'bootstrap-tokenfield/bootstrap-tokenfield');
-\OCP\Util::addScript('oclife', 'bootstrap-tokenfield/scrollspy');
-\OCP\Util::addScript('oclife', 'bootstrap-tokenfield/docs.min');
+\OCP\Util::addScript('oclife', 'bootstrap-tokenfield/typeahead.bundle');
+\OCP\Util::addScript('oclife', 'bootstrap-tokenfield/affix');
 
 \OCP\App::registerAdmin('oclife', 'settings');
+
 \OCP\Util::addscript('oclife', 'oclife/oclife_fileExtendedInfo');
 
 // Register filesystem hooks to remove thumbnails and tags DB entries

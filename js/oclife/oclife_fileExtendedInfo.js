@@ -3,69 +3,83 @@ $(document).ready(function(){
     // beware of https://github.com/owncloud/core/issues/4545
     // as enabling this might hang Chrome
     if($('#isPublic').val()){
-		return;
+        return;
     }
+    
+    var extInfoActionRegistered = false;
 
     // Add tags button to 'files/index.php'
     if(typeof FileActions !== 'undefined') {
-		// Add action to tag a group of files
-		$(".selectedActions").html(function(index, oldhtml) {
-			if(oldhtml.indexOf("download") > 0) {
-				var tagIconPath = OC.imagePath('oclife','icon_tag');
-				var newAction = "<a class=\"donwload\" id=\"tagGroup\">";
-				newAction += "<img class=\"svg\" src=\"" + tagIconPath + "\" alt=\"Tag group of file\" style=\"width: 17px; height: 17px; margin: 0px 5px 0px 5px;\" />";
-				newAction += t('oclife', 'Tag selected files') + "</a>";
-				return newAction + oldhtml;
-			} else {
-				return oldhtml;
-			}
-		});
-		
-		var infoIconPath = OC.imagePath('oclife','icon_info');
-		FileActions.register('file', t('oclife', 'Informations'), OC.PERMISSION_UPDATE, infoIconPath, function(fileName) {
-			// Action to perform when clicked
-			if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
+            // Add action to tag a group of files
+            $(".selectedActions").html(function(index, oldhtml) {
+                if(oldhtml.indexOf("download") > 0) {
+                    var tagIconPath = OC.imagePath('oclife','icon_tag');
+                    var newAction = "<a class=\"donwload\" id=\"tagGroup\">";
+                    newAction += "<img class=\"svg\" src=\"" + tagIconPath + "\" alt=\"Tag group of file\" style=\"width: 17px; height: 17px; margin: 0px 5px 0px 5px;\" />";
+                    newAction += t('oclife', 'Tag selected files') + "</a>";
+                    return newAction + oldhtml;
+                } else {
+                    return oldhtml;
+                }
+            });
 
-			showFileInfo(fileName);
+            var infoIconPath = OC.imagePath('oclife','icon_info');
+            FileActions.register('file', t('oclife', 'Informations'), OC.PERMISSION_UPDATE, infoIconPath, function(fileName) {
+                // Action to perform when clicked
+                if(scanFiles.scanning) { return; } // Workaround to prevent additional http request block scanning feedback
+
+                showFileInfo(fileName);
         });
+        
+        extInfoActionRegistered = true;
     }
 
     // This is the div where informations will appears
-    $('#content').append('<div id="oclife_infos" title="' + t('oclife', 'Informations') + '">\n\
-        <div id="oclife_infoData">\n\
-        <table>\n\
-        <tr>\n\
-        <td id="oclife_preview"></td>\n\
-        <td id="oclife_infosData" style="vertical-align: top; padding: 10px;"></td>\n\
-        </tr>\n\
-        </table>\n\
-        </div>\n\
-        <fieldset class="oclife_tagsbox" id="oclife_tags_container"><legend>Tags</legend>\n\
-        <input type="text" class="form-control" id="oclife_tags" placeholder="' + t('oclife', 'Enter tags here') + '" min-width: 150px; />\n\
-        </fieldset>\n\
-        </div>');
+    if(extInfoActionRegistered) {
+        $('#content').append('<div id="oclife_infos" title="' + t('oclife', 'Informations') + '">\n\
+            <div id="oclife_infoData">\n\
+            <table>\n\
+            <tr>\n\
+            <td id="oclife_preview"></td>\n\
+            <td style="vertical-align: top; padding: 10px;">\n\
+            <div id="oclife_infosData" style="width: 425px; height: 300px;">\n\
+            <ul>\n\
+                <li><a href="#basicInfoContent">' + t('oclife', 'Basic') + '</a></li>\n\
+                <li><a href="#exifInfoContent">' + t('oclife', 'EXIF') + '</a></li>\n\
+            </ul>\n\
+            <div id="basicInfoContent" style="height: 250px; overflow:scroll;"></div>\n\
+            <div id="exifInfoContent" style="height: 250px; overflow:scroll;"></div>\n\
+            </div></td>\n\
+            </tr>\n\
+            </table>\n\
+            </div>\n\
+            <fieldset class="oclife_tagsbox" id="oclife_tags_container"><legend>Tags</legend>\n\
+            <input type="text" class="form-control" id="oclife_tags" placeholder="' + t('oclife', 'Enter tags here') + '" min-width: 150px; />\n\
+            </fieldset>\n\
+            </div>');
 
-    // This is the div where tag group will happens
-    $('#content').append('<div id="oclife_tagGroup" title="' + t('oclife', 'Tag selected files') + '">\n\
-        <fieldset class="oclife_tagsbox"><legend>' + t('oclife', 'File(s) where the tags will be applied') + '</legend>\n\
-        <table style="margin: 5px;">\n\
-        <tr>\n\
-        <td id="oclife_multiPreview"></td>\n\
-        <td id="" style="vertical-align: top; padding: 10px;">\n\
-        <select id="oclife_filesGroup">\n\
-        </select>\n\
-        <div id="oclife_multInfosData" />\n\
-        </td>\n\
-        </tr>\n\
-        </table>\n\
-        </fieldset>\n\
-        <fieldset class="oclife_tagsbox" id="oclife_allfiles_tags_container"><legend>' + t('oclife', 'Tags common to all files') + '</legend>\n\
-        <input type="text" class="form-control" id="oclife_allfiles_tags" placeholder="' + t('oclife', 'Enter tags here') + '" min-width: 150px; />\n\
-        </fieldset>\n\
-        <fieldset class="oclife_tagsbox" id="oclife_selfiles_tags_container"><legend>' + t('oclife', 'Tags for the selected file') + '</legend>\n\
-        <input type="text" class="form-control" id="oclife_selfiles_tags" placeholder="' + t('oclife', 'Enter tags here') + '" min-width: 150px; />\n\
-        </fieldset>\n\
-        </div>');
+        // This is the div where tag group will happens
+        $('#content').append('<div id="oclife_tagGroup" title="' + t('oclife', 'Tag selected files') + '">\n\
+            <fieldset class="oclife_tagsbox"><legend>' + t('oclife', 'File(s) where the tags will be applied') + '</legend>\n\
+            <table style="margin: 5px;">\n\
+            <tr>\n\
+            <td id="oclife_multiPreview"></td>\n\
+            <td id="" style="vertical-align: top; padding: 10px;">\n\
+            <select id="oclife_filesGroup">\n\
+            </select>\n\
+            <div id="oclife_multInfosData" />\n\
+            </td>\n\
+            </tr>\n\
+            </table>\n\
+            </fieldset>\n\
+            <fieldset class="oclife_tagsbox" id="oclife_allfiles_tags_container"><legend>' + t('oclife', 'Tags common to all files') + '</legend>\n\
+            <input type="text" class="form-control" id="oclife_allfiles_tags" placeholder="' + t('oclife', 'Enter tags here') + '" min-width: 150px; />\n\
+            </fieldset>\n\
+            <fieldset class="oclife_tagsbox" id="oclife_selfiles_tags_container"><legend>' + t('oclife', 'Tags for the selected file') + '</legend>\n\
+            <input type="text" class="form-control" id="oclife_selfiles_tags" placeholder="' + t('oclife', 'Enter tags here') + '" min-width: 150px; />\n\
+            </fieldset>\n\
+            </div>');
+    }
     
     // How to react when user click on "Tag group of file" button
     $( "#tagGroup" ).on( "click", function() {
@@ -94,14 +108,14 @@ $(document).ready(function(){
 
     $("#oclife_infos").dialog({
         autoOpen: false,
-        width: 640,
+        width: 800,
         height: 480,
         modal: true,
 
         close: function() {
             $('.token').remove();
-            $('#oclife_tags').off('afterCreateToken');
-            $('#oclife_tags').off('removeToken');
+            $('#oclife_tags').off('tokenfield:createdtoken');
+            $('#oclife_tags').off('tokenfield:removedtoken');
         }
     });
 
@@ -112,21 +126,24 @@ $(document).ready(function(){
         modal: true,
 
         close: function() {
-            $('#oclife_selfiles_tags').off('afterCreateToken');
-            $('#oclife_selfiles_tags').off('removeToken');
-            $('#oclife_allfiles_tags').off('afterCreateToken');
-            $('#oclife_allfiles_tags').off('removeToken');
+            $('#oclife_selfiles_tags').off('tokenfield:createdtoken');
+            $('#oclife_selfiles_tags').off('tokenfield:removedtoken');
+            $('#oclife_allfiles_tags').off('tokenfield:createdtoken');
+            $('#oclife_allfiles_tags').off('tokenfield:removedtoken');
         }
     });
+    
+    $("#oclife_infosData").tabs();
 });
 
+
 function handleTagAdd(eventData, selFileID) {
-    var tagID = eventData.token.value;
-    var tagLabel = eventData.token.label;
+    var tagID = eventData.attrs.value;
+    var tagLabel = eventData.attrs.label;
     var newTag = (tagID.toString() === tagLabel);
 
     if(newTag) {
-        var createNew = window.confirm(t('oclife', 'The tag "') + eventData.token.label + t('oclife', '" doesn\'t exist; would you like to create a new one?'));                                                        
+        var createNew = window.confirm(t('oclife', 'The tag "') + tagLabel + t('oclife', '" doesn\'t exist; would you like to create a new one?'));                                                        
 
         if(!createNew) {
             $(eventData.relatedTarget).addClass('invalid');
@@ -194,7 +211,7 @@ function handleTagRemove(eventData, selFileID) {
         data: {
             op: 'remove',
             fileID: JSON.stringify(selFileID),
-            tagID: eventData.token.value.toString()
+            tagID: eventData.attrs.value.toString()
         },
 
         success: function(result) {
@@ -212,7 +229,8 @@ function handleTagRemove(eventData, selFileID) {
 
 function showFileInfo(fileName) {
     var infoPreview = "";
-    var infoContent = "";
+    var basicInfoContent = "";
+    var exifInfoContent = "";
     var fileID = -1;
     var directory = $('#dir').val();
     directory = (directory === "/") ? directory : directory + "/";
@@ -232,7 +250,8 @@ function showFileInfo(fileName) {
             var jsonResult = JSON.parse(result);
 
             infoPreview = jsonResult.preview;
-            infoContent = jsonResult.infos;
+            basicInfoContent = jsonResult.infos;
+            exifInfoContent = jsonResult.exif;
             fileID = jsonResult.fileid;
             
             // Prepare token fields
@@ -254,7 +273,7 @@ function showFileInfo(fileName) {
                             error: function (xhr, status) {
                                 window.alert(t('oclife', 'Unable to get the tags! Ajax error.'));
                             }
-                        })
+                        });
                     },
                     minLength: 2,
                     delay: 200
@@ -294,18 +313,26 @@ function showFileInfo(fileName) {
         type: "POST"});
 
     // Install event handlers
-    $('#oclife_tags').on('afterCreateToken', function(e) {
+    $('#oclife_tags').on('tokenfield:createdtoken', function(e) {
         handleTagAdd(e, fileID);
     });
 
-    $('#oclife_tags').on('removeToken', 
+    $('#oclife_tags').on('tokenfield:removedtoken', 
         function (e) {
             handleTagRemove(e, fileID);
         }
     );
 
     $('#oclife_preview').html(infoPreview);
-    $('#oclife_infosData').html(infoContent);
+    
+    $('#basicInfoContent').html(basicInfoContent);
+
+    if(exifInfoContent === "") {
+        $('#exifInfoContent').html(t('oclife', 'No EXIF informations on this file!'));
+    } else {
+        $('#exifInfoContent').html(exifInfoContent);
+    }
+    
     $('#oclife_infos').dialog("open");
 }
 
@@ -356,7 +383,7 @@ function populateFileInfo(filePath) {
 					error: function (xhr, status) {
 						window.alert(p('oclife', 'Unable to get the tags! Ajax error.'));
 					}
-				})
+				});
 			},
 			minLength: 2,
 			delay: 200                                                
@@ -378,10 +405,10 @@ function populateFileInfo(filePath) {
 	var fileID = (fileInfos.fileID === -1) ? getSelectedFiles('id') : parseInt(fileInfos.fileID);
 
 	// Remove old event handler
-	$('#oclife_selfiles_tags').off('afterCreateToken');
-	$('#oclife_selfiles_tags').off('removeToken');
-	$('#oclife_allfiles_tags').off('afterCreateToken');
-	$('#oclife_allfiles_tags').off('removeToken');
+	$('#oclife_selfiles_tags').off('tokenfield:createdtoken');
+	$('#oclife_selfiles_tags').off('tokenfield:removedtoken');
+	$('#oclife_allfiles_tags').off('tokenfield:createdtoken');
+	$('#oclife_allfiles_tags').off('tokenfield:removedtoken');
 
 	// Query for actual tags
 	$.ajax({
@@ -411,21 +438,21 @@ function populateFileInfo(filePath) {
 		type: "POST"});
 			
 	// Install event handlers
-	$('#oclife_selfiles_tags').on('afterCreateToken', function(e) {
+	$('#oclife_selfiles_tags').on('tokenfield:createdtoken', function(e) {
 		handleTagAdd(e, fileID);
 	});
 
-	$('#oclife_selfiles_tags').on('removeToken', 
+	$('#oclife_selfiles_tags').on('tokenfield:removedtoken', 
 		function (e) {
 			handleTagRemove(e, fileID);
 		}
 	);
 	
-	$('#oclife_allfiles_tags').on('afterCreateToken', function(e) {
+	$('#oclife_allfiles_tags').on('tokenfield:createdtoken', function(e) {
 		handleTagAdd(e, fileID);
 	});
 	
-	$('#oclife_allfiles_tags').on('removeToken', 
+	$('#oclife_allfiles_tags').on('tokenfield:removedtoken', 
 		function (e) {
 			handleTagRemove(e, fileID);
 		}
@@ -467,25 +494,25 @@ function getFileInfo(filePath) {
 }
 
 function getSelectedFiles(property) {
-	var elements=$('td.filename input:checkbox:checked').parent().parent();
-	var files=[];
-	elements.each(function(i,element) {
-		var file={
-			id:$(element).attr('data-id'),
-			name:$(element).attr('data-file'),
-			mime:$(element).data('mime'),
-			type:$(element).data('type'),
-			size:$(element).data('size'),
-			etag:$(element).data('etag')
-		};
+    var elements=$('td.filename input:checkbox:checked').parent().parent();
+    var files=[];
+    elements.each(function(i,element) {
+        var file={
+            id:$(element).attr('data-id'),
+            name:$(element).attr('data-file'),
+            mime:$(element).data('mime'),
+            type:$(element).data('type'),
+            size:$(element).data('size'),
+            etag:$(element).data('etag')
+        };
 
-		if(file.mime.indexOf('directory') === -1) {
-			if (property) {
-				files.push(file[property]);
-			} else {
-				files.push(file);
-			}
-		}
-	});
-	return files;
+        if(file.mime.indexOf('directory') === -1) {
+            if(property) {
+                files.push(file[property]);
+            } else {
+                files.push(file);
+            }
+        }
+    });
+    return files;
 }

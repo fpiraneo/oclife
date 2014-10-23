@@ -260,6 +260,7 @@ class ImageHandler {
 
     /**
      * Generate thumbnail of an image
+     * @param string $viewPath View path
      * @param string $srcImagePath Source image path
      * @param string $dstImagePath Destination image path
      * @return boolean TRUE image generated successfully, FALSE otherwise

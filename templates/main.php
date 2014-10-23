@@ -6,14 +6,46 @@ $l = new \OC_L10N('oclife');
 <div id="notification" style="display:none;"></div>
 
 <div class='oclife_toolbar'>
-    <div>
-        <span class="oclife_header"><?php p($l->t('Actual tags')) ?></span>
-    </div>
+    <span class="oclife_header">
+        <?php p($l->t('Actual tags')) ?>
+    </span>
 
-    <div style="text-align: right; padding-right: 10px;">
-        <button id="expandAll"><?php p($l->t('Expand all')) ?></button>
-        <button id="collapseAll"><?php p($l->t('Collapse all')) ?></button>        
-    </div>
+    <button id="btnNew"><?php p($l->t('New')) ?></button>
+    <button id="btnRename"><?php p($l->t('Rename')) ?></button>
+    <button id="btnDelete"><?php p($l->t('Delete')) ?></button>
+    <button id="btnExpandAll"><?php p($l->t('Expand all')) ?></button>
+    <button id="btnCollapseAll"><?php p($l->t('Collapse all')) ?></button>
+    
+    <?php p($l->t('Owner:')) ?>
+    <select name="menuOwnName" id="menuOwnName" disabled="true">
+        <option value='' disabled='disabled' selected='selected'><?php p($l->t('Not set')) ?></option>
+        
+        <?php
+            $usersList = \OCA\OCLife\utilities::getUsers(NULL, TRUE);
+            foreach($usersList as $uid => $userName) {
+                printf("<option value='%s'>%s</option>'", $uid, is_null($userName) ? $uid : $userName);
+            }
+        ?>        
+    </select>
+
+    <select name="menuOwnPriv" id="menuOwnPriv" disabled="true">
+        <option value="OwnRO"><?php p($l->t('Read only')) ?></option>
+        <option value="OwnRW"><?php p($l->t('Can modify')) ?></option>
+    </select>
+
+    <?php p($l->t('Group:')) ?>
+    <select name="menuGrpPriv" id="menuGrpPriv" disabled="true">
+        <option value="GrpNO"><?php p($l->t('None')) ?></option>
+        <option value="GrpRO"><?php p($l->t('Read only')) ?></option>
+        <option value="GrpRW"><?php p($l->t('Can modify')) ?></option>
+    </select>
+
+    <?php p($l->t('All:')) ?>
+    <select name="menuAllPriv" id="menuAllPriv" disabled="true">
+        <option value="AllNO"><?php p($l->t('None')) ?></option>
+        <option value="AllRO"><?php p($l->t('Read only')) ?></option>
+        <option value="AllRW"><?php p($l->t('Can modify')) ?></option>
+    </select>
 </div>
 
 <div id="renameTag" title="<?php p($l->t('Rename tag')) ?>">
@@ -52,9 +84,10 @@ $l = new \OC_L10N('oclife');
     </div>
 </div>
 
-<div id="imagePreview" title="<?php p($l->t('Image preview')) ?>"> 
-	<div id="previewPath" style="padding: 5px 5px 0px 0px; font-weight: bold;">filePath</div>
-    <img id="previewArea" src="" />
+<div id="imagePreview" title="<?php p($l->t('Image preview')) ?>">
+    <div>
+        <img id="previewArea" src="" />
+    </div>
 </div>
 
 <div data-layout='{"type": "border", "hgap": 5, "vgap": 3}' class="oclife_content" id="oclife_content">

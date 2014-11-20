@@ -281,7 +281,7 @@ class utilities {
             return FALSE;
         }
 
-        $sql = 'SELECT `uid` FROM *PREFIX*group_user WHERE `gid` IN ( SELECT `gid` FROM *PREFIX*group_user WHERE `uid`=?) GROUP BY `uid`';
+        $sql = 'SELECT `uid` FROM `*PREFIX*group_user` WHERE `gid` IN ( SELECT `gid` FROM *PREFIX*group_user WHERE `uid`=?) GROUP BY `uid`';
         $args = array($user);
 
         $query = \OCP\DB::prepare($sql);
@@ -304,11 +304,11 @@ class utilities {
      */
     public static function getUsers($group = NULL, $withDisplayName = FALSE) {
         if(trim($group) === '' || $group === NULL) {
-            $sql = 'SELECT `uid`, `displayname` FROM *PREFIX*users ORDER BY `displayname`';
+            $sql = 'SELECT `uid`, `displayname` FROM `*PREFIX*users` ORDER BY `displayname`';
             $query = \OCP\DB::prepare($sql);
             $resRsrc = $query->execute();
         } else {
-            $sql = 'SELECT `uid`, `displayname` FROM *PREFIX*users WHERE `uid` IN (SELECT `uid` FROM *PREFIX*group_user WHERE `gid` = ?) ORDER BY `displayname`';
+            $sql = 'SELECT `uid`, `displayname` FROM `*PREFIX*users` WHERE `uid` IN (SELECT `uid` FROM *PREFIX*group_user WHERE `gid` = ?) ORDER BY `displayname`';
             $args = array($group);            
             $query = \OCP\DB::prepare($sql);
             $resRsrc = $query->execute($args);

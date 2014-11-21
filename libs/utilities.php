@@ -261,9 +261,11 @@ class utilities {
         $result = is_null($tableClass) ? "<table>\n" : sprintf("<table class=\"%s\">\n", $tableClass);
 
         foreach($myArray as $key => $value) {
-            $keyColClassOut = is_null($keyColClass) ? '' : sprintf(" class=\"%s\"", $keyColClass);
-            $line = sprintf("<tr><td%s>%s</td><td>%s</td></tr>\n", $keyColClassOut, trim($key), trim($value));
-            $result .= $line;
+	        if (($key <> 'MakerNote') && (strpos($key, 'UndefinedTag') === false)) {
+                $keyColClassOut = is_null($keyColClass) ? '' : sprintf(" class=\"%s\"", $keyColClass);
+                $line = sprintf("<tr><td%s>%s</td><td>%s</td></tr>\n", $keyColClassOut, trim($key), trim($value));
+                $result .= $line;
+	        }
         }
         
         $result .= "</table>\n";

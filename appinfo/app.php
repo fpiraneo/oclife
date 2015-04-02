@@ -1,6 +1,6 @@
 <?php
 /*
- * Copyright 2014 by Francesco PIRANEO G. (fpiraneo@gmail.com)
+ * Copyright 2015 by Francesco PIRANEO G. (fpiraneo@gmail.com)
  * 
  * This file is part of oclife.
  * 
@@ -40,7 +40,8 @@
 ));
 
 // Handle translations
-$l = new \OC_L10N('oclife');
+//$l = new \OC_L10N('oclife');
+$l = \OCP\Util::getL10N('oclife');
 
 // Add what's needed by TagManager
 \OCP\Util::addStyle('oclife', 'bootstrap-tokenfield');

@@ -1,12 +1,7 @@
 <?php
-// Handle translations
-$l = new \OC_L10N('oclife');
-?>
-
-<?php
     $oc_version = $_SESSION['OC_Version'][0];
 
-    if($oc_version === 7) {
+    if($oc_version >= 7) {
         print '<div class="section">';
     }
 ?>

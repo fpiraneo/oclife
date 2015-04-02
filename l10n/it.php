@@ -7,8 +7,8 @@ $TRANSLATIONS = array(
     'Use ImageMagick instead of GD (More image formats handled)' => 'Usare ImageMagick al posto di GD (sarà possibile gestire più formati grafici)',
 
     // - JavaScript
-    'Settings not saved! Data base error!', 'Impostazioni non salvate! Errore data base!',
-    'Settings not saved! Communication error!', 'Impostazioni non salvate! Errore di comunicazione!',
+    'Settings not saved! Data base error!' => 'Impostazioni non salvate! Errore data base!',
+    'Settings not saved! Communication error!' => 'Impostazioni non salvate! Errore di comunicazione!',
     
     // Main app
     // - php and templates

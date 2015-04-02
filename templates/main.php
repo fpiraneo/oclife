@@ -1,8 +1,3 @@
-<?php
-// Handle translations
-$l = new \OC_L10N('oclife');
-?>
-
 <div id="notification" style="display:none;"></div>
 
 <div class='oclife_toolbar'>

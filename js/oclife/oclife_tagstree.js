@@ -24,6 +24,7 @@ $(document).ready(function() {
         activate: function(event, data) {
             var node = $("#tagstree").fancytree("getActiveNode");
             if(node.key === "-1") {
+                $("#btnNew").button( "option", "disabled", false );
                 return;
             }
             
@@ -145,7 +146,8 @@ $(document).ready(function() {
             icons: {
                 primary: "ui-icon-document"
             },
-            text: false
+            text: false,
+            disabled: true 
         })
         .click(function() {
             var node = $("#tagstree").fancytree("getActiveNode");

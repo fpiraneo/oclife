@@ -1,6 +1,5 @@
 {
     "translations": {
-    "Tags": "Теги",
     "ImageMagick is loaded and ready to be used": "ImageMagick загружен и готов к использованию.",
     "ImageMagick is not loaded: Please refers to php manual.": "ImageMagick не загружен! Пожалуйста обратитесь к руководству PHP.",
     "Only admins can edit tags": "Только администраторы могут редактировать теги.",

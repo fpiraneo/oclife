@@ -1,7 +1,7 @@
 <?php
 /*
 * Copyright 2015 by Francesco PIRANEO G. (fpiraneo@gmail.com)
-* Translations in German kindly provided by Roland Wegmann (go4unkwn@gmx.net)
+* Translations in Russian kindly provided by AlucoST (alucost@gmail.com)
 *
 * This file is part of oclife.
 *

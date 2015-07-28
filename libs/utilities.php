@@ -101,7 +101,7 @@ class utilities {
     public static function getFileList($user, $path = '', $onlyID = FALSE, $indexed = FALSE) {
         $oc_version = $_SESSION['OC_Version'][0];
         
-        if($oc_version === 7) {
+        if($oc_version >= 7) {
             $myres = \OCA\OCLife\utilities::getOC7FileList($user, $path, $onlyID, $indexed);
             return $myres;
         } else {
